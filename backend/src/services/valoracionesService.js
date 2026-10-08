@@ -12,10 +12,10 @@ const crearValoracion = (datosValoracion, callback) => {
     }
 
     const sql = `
-        SELECT c.id, p.user_id AS usuario_id
+        SELECT c.id, pr.user_id AS usuario_id
         FROM contratacion c
         INNER JOIN presupuestos pr ON pr.id = c.presupuesto_id
-        WHERE c.id = ? AND c.estado = 'finalizado' AND p.user_id = ?
+        WHERE c.id = ? AND c.estado = 'finalizado' AND pr.user_id = ?
     `;
 
     conexion.query(sql, [contratacion_id, usuario_id], (err, rows) => {

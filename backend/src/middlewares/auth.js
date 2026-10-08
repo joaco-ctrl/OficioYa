@@ -53,6 +53,14 @@ const esProfesional = (req, res, next) => {
     });
 };
 
+const esCliente = (req, res, next) => {
+    if (req.usuario.rol !== 'cliente') {
+        return res.status(403).json({ mensaje: 'Acceso restringido solo para clientes' });
+    }
+
+    next();
+};
+
 const esAdministrador = (req, res, next) => {
     if (req.usuario.rol !== 'administrador') {
         return res.status(403).json({ mensaje: 'Acceso restringido solo para administradores' });
@@ -66,6 +74,7 @@ module.exports = {
     setUsuario,
     getUsuario,
     verificarToken,
+    esCliente,
     esProfesional,
     esAdministrador
 };

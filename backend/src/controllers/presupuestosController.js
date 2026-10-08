@@ -4,7 +4,7 @@ const crearPresupuesto = (req, res) => {
     const { descripcion, condiciones, monto_estimado } = req.body;
     const servicioId = Number(req.body.servicio_id);
 
-    if (!servicioId || !descripcion) {
+    if (!Number.isInteger(servicioId) || servicioId <= 0 || typeof descripcion !== 'string' || !descripcion.trim()) {
         return res.status(400).json({ mensaje: 'El servicio y la descripción son obligatorios' });
     }
 
@@ -54,9 +54,14 @@ const obtenerMisSolicitudes = (req, res) => {
 const actualizarPresupuesto = (req, res) => {
     const presupuestoId = Number(req.params.id);
     const { descripcion, condiciones, monto_estimado } = req.body;
+    const cambios = [descripcion, condiciones, monto_estimado];
 
-    if (!descripcion && !condiciones && !monto_estimado) {
+    if (cambios.every((valor) => valor === undefined)) {
         return res.status(400).json({ mensaje: 'No se recibieron campos para actualizar' });
+    }
+
+    if (!Number.isInteger(presupuestoId) || presupuestoId <= 0) {
+        return res.status(400).json({ mensaje: 'El identificador del presupuesto es inválido' });
     }
 
     presupuestosService.actualizarPresupuesto(presupuestoId, req.profesional_id, { descripcion, condiciones, monto_estimado }, (err, actualizado) => {

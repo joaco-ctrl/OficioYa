@@ -1,46 +1,44 @@
 const conexion = require("../config/database")
+const bcrypt = require("bcrypt")
 
 
 
 function login(data, callback) {
     const { email, password } = data;
-    if (!email && !password) {
+    if (!email || !password) {
         return callback(new Error("datos incompletos"))
-    } else {
-        conexion.query(
-            " SELECT * FROM usuarios WHERE email=?",
-            [email],
-            callback
-
-        )
     }
 
+    conexion.query(
+        "SELECT * FROM usuarios WHERE email = ? AND activo = 1 AND deleted_at IS NULL",
+        [email],
+        callback
+    )
 
 }
 
 function usuarioRegistro(data, callback) {
     const {email, password, telefono, nombre, apellido } = data
-    if (!email && !password && !telefono && !nombre && !apellido) {
+    if (!email || !password || !nombre || !apellido) {
         return callback(new Error("datos incompletos"))
-    } else {
-        conexion.query
-        (
-            "INSERT INTO usuarios (email, password, telefono, nombre, apellido) VALUES (?, ?, ?, ?, ?)",
-            [email, password, telefono, nombre, apellido],
-            callback
-        )
     }
+
+    conexion.query(
+        "INSERT INTO usuarios (email, password, telefono, nombre, apellido, rol) VALUES (?, ?, ?, ?, ?, 'cliente')",
+        [email, password, telefono || null, nombre, apellido],
+        callback
+    )
 }
 
 const profesionalRegistro = async (data) => {
   const { 
     nombre, apellido, telefono, email, password, 
-    biografia, zona, disponibilidad} = data;
+    biografia, zona, disponibilidad, documento_url} = data;
     
-  const conexion = await db.getConnection();
+  const connection = await conexion.promise().getConnection();
 
   try {
-    await conexion.beginTransaction();
+    await connection.beginTransaction();
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -48,7 +46,7 @@ const profesionalRegistro = async (data) => {
       INSERT INTO usuarios (nombre, apellido, telefono, email, password, rol)
       VALUES (?, ?, ?, ?, ?, 'profesional')
     `;
-    const [resultUsuario] = await conexion.query(sqlUsuario, [
+    const [resultUsuario] = await connection.query(sqlUsuario, [
       nombre, apellido, telefono, email, hashedPassword
     ]);
 
@@ -58,19 +56,23 @@ const profesionalRegistro = async (data) => {
       INSERT INTO profesionales (user_id, biografia, zona, disponibilidad, documento_url)
       VALUES (?, ?, ?, ?, ?)
     `;
-    await conexion.query(sqlProfesional, [
-      userId, biografia, zona, disponibilidad, documento_url
+    await connection.query(sqlProfesional, [
+      userId, biografia || null, zona || null, disponibilidad || null, documento_url || null
     ]);
 
-    await conexion.commit();
+    await connection.commit();
 
     return { id: userId, email, rol: 'profesional' };
 
   } catch (error) {
-    await conexion.rollback();
+    try {
+      await connection.rollback();
+    } catch (rollbackError) {
+      error.rollbackError = rollbackError;
+    }
     throw error;
   } finally {
-    conexion.release();
+    connection.release();
   }
 };
 

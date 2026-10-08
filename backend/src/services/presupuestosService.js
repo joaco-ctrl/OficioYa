@@ -103,21 +103,43 @@ const obtenerPresupuestoPorId = (presupuestoId, callback) => {
 
 const actualizarPresupuesto = (presupuestoId, profesionalId, datos, callback) => {
     const { descripcion, condiciones, monto_estimado } = datos;
+    const actualizaciones = [];
+    const valores = [];
 
-    if (!descripcion && !condiciones && !monto_estimado) {
+    if (descripcion !== undefined) {
+        actualizaciones.push('p.descripcion = ?');
+        valores.push(descripcion || null);
+    }
+
+    if (condiciones !== undefined) {
+        actualizaciones.push('p.condiciones = ?');
+        valores.push(condiciones || null);
+    }
+
+    if (monto_estimado !== undefined) {
+        const monto = Number(monto_estimado);
+        if (!Number.isFinite(monto) || monto <= 0) {
+            return callback(new Error('El monto estimado debe ser un número mayor que cero'), null);
+        }
+        actualizaciones.push('p.monto_estimado = ?');
+        valores.push(monto);
+    }
+
+    if (actualizaciones.length === 0) {
         return callback(new Error('No se recibieron campos para actualizar'), null);
     }
 
+    actualizaciones.push("p.estado = 'respondido'");
     const sql = `
         UPDATE presupuestos p
         INNER JOIN servicios s ON s.id = p.servicio_id
-        SET p.descripcion = ?, p.condiciones = ?, p.monto_estimado = ?
+        SET ${actualizaciones.join(', ')}
         WHERE p.id = ? AND s.profesional_id = ? AND p.estado = 'pendiente'
     `;
 
     conexion.query(
         sql,
-        [descripcion || null, condiciones || null, monto_estimado || null, presupuestoId, profesionalId],
+        [...valores, presupuestoId, profesionalId],
         (err, result) => {
             if (err) return callback(err, null);
             callback(null, result.affectedRows > 0);
@@ -140,10 +162,17 @@ const rechazarPresupuesto = (presupuestoId, profesionalId, callback) => {
 };
 
 const aceptarPresupuesto = (presupuestoId, usuarioId, callback) => {
-    const connection = conexion.promise();
+    (async () => {
+        let connection;
+        let transactionStarted = false;
+        let contrato;
+        let error;
 
-    connection.beginTransaction()
-        .then(() => {
+        try {
+            connection = await conexion.promise().getConnection();
+            await connection.beginTransaction();
+            transactionStarted = true;
+
             const presupuestoSql = `
                 SELECT
                     p.id,
@@ -155,59 +184,64 @@ const aceptarPresupuesto = (presupuestoId, usuarioId, callback) => {
                 FROM presupuestos p
                 INNER JOIN servicios s ON s.id = p.servicio_id
                 WHERE p.id = ? AND p.user_id = ?
+                FOR UPDATE
             `;
+            const [rows] = await connection.query(presupuestoSql, [presupuestoId, usuarioId]);
 
-            return connection.query(presupuestoSql, [presupuestoId, usuarioId])
-                .then(([rows]) => {
-                    if (rows.length === 0) {
-                        throw new Error('Presupuesto no encontrado o no pertenece al usuario');
-                    }
+            if (rows.length === 0) {
+                throw new Error('Presupuesto no encontrado o no pertenece al usuario');
+            }
 
-                    const presupuesto = rows[0];
+            const presupuesto = rows[0];
+            if (presupuesto.estado !== 'respondido') {
+                throw new Error('El presupuesto debe haber sido respondido antes de aceptarlo');
+            }
 
-                    if (presupuesto.estado !== 'pendiente') {
-                        throw new Error('El presupuesto no puede ser aceptado en su estado actual');
-                    }
+            const montoAcordado = Number(presupuesto.monto_estimado);
+            if (!Number.isFinite(montoAcordado) || montoAcordado <= 0) {
+                throw new Error('El presupuesto debe contener un monto mayor que cero para ser aceptado');
+            }
 
-                    if (!presupuesto.monto_estimado) {
-                        throw new Error('El presupuesto debe contener un monto estimado para ser aceptado');
-                    }
+            const contratoSql = `
+                INSERT INTO contratacion (presupuesto_id, estado, monto_acordado)
+                VALUES (?, 'pendiente', ?)
+            `;
+            const [result] = await connection.query(contratoSql, [
+                presupuesto.id,
+                montoAcordado
+            ]);
 
-                    const contratoSql = `
-                        INSERT INTO contratacion (
-                            presupuesto_id,
-                            estado,
-                            monto_acordado
-                        ) VALUES (?, 'pendiente', ?)
-                    `;
+            const [actualizacion] = await connection.query(
+                "UPDATE presupuestos SET estado = 'aceptado' WHERE id = ? AND estado = 'respondido'",
+                [presupuestoId]
+            );
+            if (actualizacion.affectedRows !== 1) {
+                throw new Error('El presupuesto ya no está disponible para aceptar');
+            }
 
-                    return connection.query(contratoSql, [
-                        presupuesto.id,
-                        presupuesto.monto_estimado
-                    ]).then(([result]) => {
-                        const contratoId = result.insertId;
+            await connection.commit();
+            transactionStarted = false;
+            contrato = {
+                id: result.insertId,
+                presupuesto_id: presupuesto.id,
+                monto_acordado: montoAcordado,
+                estado: 'pendiente'
+            };
+        } catch (err) {
+            error = err;
+            if (connection && transactionStarted) {
+                try {
+                    await connection.rollback();
+                } catch (rollbackError) {
+                    error.rollbackError = rollbackError;
+                }
+            }
+        } finally {
+            if (connection) connection.release();
+        }
 
-                        return connection.query(
-                            'UPDATE presupuestos SET estado = ? WHERE id = ?',
-                            ['aceptado', presupuestoId]
-                        ).then(() => ({
-                            id: contratoId,
-                            presupuesto_id: presupuesto.id,
-                            monto_acordado: presupuesto.monto_estimado,
-                            estado: 'pendiente'
-                        }));
-                    });
-                });
-        })
-        .then((contrato) => {
-            return connection.commit()
-                .then(() => callback(null, contrato));
-        })
-        .catch((err) => {
-            connection.rollback()
-                .then(() => callback(err, null))
-                .catch(() => callback(err, null));
-        });
+        callback(error || null, contrato || null);
+    })();
 };
 
 module.exports = {

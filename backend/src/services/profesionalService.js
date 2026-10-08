@@ -56,14 +56,18 @@ const actualizarPerfilProfesional = (userId, datos, callback) => {
         disponibilidad
     } = datos;
 
-    if (!nombre && !apellido && !telefono && !biografia && !zona && !disponibilidad ) {
+    if ([nombre, apellido, telefono, biografia, zona, disponibilidad].every((valor) => valor === undefined)) {
         return callback(new Error('No se recibieron campos para actualizar'), null);
     }
 
-    const connection = conexion.promise();
+    (async () => {
+        let connection;
+        let transactionStarted = false;
 
-    connection.beginTransaction()
-        .then(() => {
+        try {
+            connection = await conexion.promise().getConnection();
+            await connection.beginTransaction();
+            transactionStarted = true;
             const camposUsuario = [];
             const valoresUsuario = [];
 
@@ -100,34 +104,38 @@ const actualizarPerfilProfesional = (userId, datos, callback) => {
                 valoresProfesional.push(disponibilidad || null);
             }
 
-            const consultas = [];
-
             if (camposUsuario.length > 0) {
-                consultas.push(
-                    connection.query(
-                        `UPDATE usuarios SET ${camposUsuario.join(', ')} WHERE id = ?`,
-                        [...valoresUsuario, userId]
-                    )
+                await connection.query(
+                    `UPDATE usuarios SET ${camposUsuario.join(', ')} WHERE id = ?`,
+                    [...valoresUsuario, userId]
                 );
             }
 
             if (camposProfesional.length > 0) {
-                consultas.push(
-                    connection.query(
-                        `UPDATE profesionales SET ${camposProfesional.join(', ')} WHERE user_id = ?`,
-                        [...valoresProfesional, userId]
-                    )
+                await connection.query(
+                    `UPDATE profesionales SET ${camposProfesional.join(', ')} WHERE user_id = ?`,
+                    [...valoresProfesional, userId]
                 );
             }
 
-            return Promise.all(consultas).then(() => connection.commit());
-        })
-        .then(() => obtenerPerfilProfesional(userId, callback))
-        .catch((err) => {
-            connection.rollback()
-                .then(() => callback(err, null))
-                .catch(() => callback(err, null));
-        });
+            await connection.commit();
+            transactionStarted = false;
+        } catch (err) {
+            if (connection && transactionStarted) {
+                try {
+                    await connection.rollback();
+                } catch (rollbackError) {
+                    err.rollbackError = rollbackError;
+                }
+            }
+            callback(err, null);
+            return;
+        } finally {
+            if (connection) connection.release();
+        }
+
+        obtenerPerfilProfesional(userId, callback);
+    })().catch((err) => callback(err, null));
 };
 
 module.exports = {

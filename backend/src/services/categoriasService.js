@@ -15,11 +15,10 @@ function crearCategorias(data, callback) {
     }
 }
 
-function obtenerCategoriasPorId(data, callback) {
-    const { id } = Number(data)
+function obtenerCategoriasPorId(id, callback) {
     conexion.query(
         "SELECT * FROM categorias WHERE id = ?",
-        [id],
+        [Number(id)],
         callback
     )
 }
@@ -31,6 +30,10 @@ conexion.query("SELECT * FROM categorias ",callback)
 
 function borrarCategorias(data, callback) {
     const  id  = Number(data.id)
+    if (!Number.isInteger(id) || id <= 0) {
+        return callback(new Error("identificador de categoría inválido"))
+    }
+
     conexion.query(
         "DELETE FROM categorias WHERE id = ?",
         [id],
@@ -41,7 +44,7 @@ function borrarCategorias(data, callback) {
 function actualizarCategorias(data, callback){
     const {  nombre, descripcion } = data
     const id = Number(data.id)
-    if (!id && !nombre) {
+    if (!Number.isInteger(id) || id <= 0 || !nombre) {
         return callback(new Error("datos incompletos"))
     }else{
         conexion.query(

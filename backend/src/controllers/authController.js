@@ -4,12 +4,16 @@ const auth = require("../middlewares/auth");
 const jwt = require("jsonwebtoken");
 function login(req, res) {
     const { email, password } = req.body
+    if (!email || !password) {
+        return res.status(400).json({ error: "email y contraseña son obligatorios" })
+    }
+
     authService.login({ email, password }, (err, results) => {
         if (err) {
             return res.status(500).json({ error: "error en la base de datos" })
         }
         if (!results || results.length === 0) {
-            return res.status(404).json({ error: "email no encontrado" })
+            return res.status(401).json({ error: "email o contraseña incorrectos" })
         }
         const usuario = results[0];
         const hashAlmacenado = usuario.password
@@ -50,6 +54,10 @@ function login(req, res) {
 
 function usuarioRegistro(req, res) {
     const { email, password, telefono, nombre, apellido } = req.body;
+    if (!email || !password || !nombre || !apellido) {
+        return res.status(400).json({ error: "nombre, apellido, email y contraseña son obligatorios" });
+    }
+
     bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
             return res.status(500).json({ error: "Error al encriptar contraseña" });
