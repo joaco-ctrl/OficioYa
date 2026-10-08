@@ -1,0 +1,17 @@
+usuario: admin
+
+email:admin@oficioya.com
+contraseña:admin
+
+
+
+usuario: profesional
+
+email:profesional@oficioya.com
+contraseña:Password123!
+
+
+usuario: cliente
+
+email:usuario@oficioya.com
+contraseña:usuario
