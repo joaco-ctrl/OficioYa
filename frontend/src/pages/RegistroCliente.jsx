@@ -3,18 +3,20 @@ import Encabezado from '../components/Encabezado.jsx'
 import Tarjeta from '../components/Tarjeta.jsx'
 import CampoTexto from '../components/CampoTexto.jsx'
 import Boton from '../components/Boton.jsx'
+import { useNavigate } from 'react-router-dom'
 import api from '../api/api.js'
-import { obtenerMensajeError } from '../utilidades/mensajeError.js'
+import { mensajeError } from '../utilidades/mensajeError.js'
 
 function RegistroCliente() {
+  const navigate = useNavigate()
   const [datos, setDatos] = useState({
     nombre: '',
     apellido: '',
     email: '',
     contrasena: ''
   })
-  const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
+  const [enviando, setEnviando] = useState(false)
 
   const handleChange = (e) => {
     setDatos({ ...datos, [e.target.name]: e.target.value })
@@ -22,36 +24,41 @@ function RegistroCliente() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setMensaje('')
     setError('')
-
+    setEnviando(true)
     try {
       await api.post('/auth/register', {
-        ...datos,
-        password: datos.contrasena,
+        nombre: datos.nombre,
+        apellido: datos.apellido,
+        email: datos.email,
+        password: datos.contrasena
       })
-      setMensaje('Cuenta creada. Ya podés iniciar sesión.')
-      setDatos({ nombre: '', apellido: '', email: '', contrasena: '' })
-    } catch (error) {
-      setError(obtenerMensajeError(error, 'No se pudo crear la cuenta.'))
+      navigate('/inicio-sesion', {
+        state: { mensaje: 'Cuenta creada. Iniciá sesión para continuar.' }
+      })
+    } catch (requestError) {
+      setError(mensajeError(requestError, 'No se pudo crear la cuenta.'))
+    } finally {
+      setEnviando(false)
     }
   }
 
   return (
     <>
-      <Encabezado textoDerecha="Volver" rutaDerecha="/registro" />
-      <Tarjeta ancho="480px">
-        <h1>Cliente</h1>
-        <form onSubmit={handleSubmit}>
-          <CampoTexto label="NOMBRE" nombre="nombre" valor={datos.nombre} onChange={handleChange} />
-          <CampoTexto label="APELLIDO" nombre="apellido" valor={datos.apellido} onChange={handleChange} />
-          <CampoTexto label="EMAIL" nombre="email" tipo="email" valor={datos.email} onChange={handleChange} />
-          <CampoTexto label="CONTRASEÑA" nombre="contrasena" tipo="password" valor={datos.contrasena} onChange={handleChange} />
-          <Boton texto="CREAR CUENTA" tipo="submit" variante="azul" />
-        </form>
-        {mensaje && <p role="status">{mensaje}</p>}
-        {error && <p role="alert">{error}</p>}
-      </Tarjeta>
+      <Encabezado />
+      <div className="pantalla-con-fondo">
+        <Tarjeta ancho="480px">
+          <h1>Crear cuenta de Cliente</h1>
+          <form onSubmit={handleSubmit}>
+            <CampoTexto label="NOMBRE" nombre="nombre" valor={datos.nombre} onChange={handleChange} />
+            <CampoTexto label="APELLIDO" nombre="apellido" valor={datos.apellido} onChange={handleChange} />
+            <CampoTexto label="EMAIL" nombre="email" tipo="email" valor={datos.email} onChange={handleChange} />
+            <CampoTexto label="CONTRASEÑA" nombre="contrasena" tipo="password" valor={datos.contrasena} onChange={handleChange} />
+            {error && <p role="alert" className="sin-resultados">{error}</p>}
+            <Boton texto={enviando ? 'CREANDO CUENTA...' : 'CREAR CUENTA'} tipo="submit" variante="azul" />
+          </form>
+        </Tarjeta>
+      </div>
     </>
   )
 }

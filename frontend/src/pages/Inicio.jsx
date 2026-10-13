@@ -3,21 +3,23 @@ import Encabezado from '../components/Encabezado.jsx'
 import BarraBusqueda from '../components/BarraBusqueda.jsx'
 import Categoria from '../components/Categoria.jsx'
 import api from '../api/api.js'
-import { obtenerMensajeError } from '../utilidades/mensajeError.js'
+import { mensajeError } from '../utilidades/mensajeError.js'
 
 function Inicio() {
   const [categorias, setCategorias] = useState([])
   const [error, setError] = useState('')
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     api.get('/categorias/obtener-categorias')
-      .then(setCategorias)
-      .catch((error) => setError(obtenerMensajeError(error, 'No se pudieron cargar las categorías.')))
+      .then(({ data }) => setCategorias(data))
+      .catch((requestError) => setError(mensajeError(requestError)))
+      .finally(() => setCargando(false))
   }, [])
 
   return (
     <>
-      <Encabezado mostrarPerfil={true} />
+      <Encabezado mostrarAuth={true} />
 
       <section className="hero">
         <h1>¿QUÉ SERVICIO ESTAS BUSCANDO?</h1>
@@ -28,12 +30,27 @@ function Inicio() {
       <section className="seccion">
         <h2>CATEGORIAS POPULARES</h2>
         <div className="grilla-categorias">
-          {categorias.map((cat) => (
-            <Categoria key={cat.id} {...cat} />
+          {categorias.map((categoria) => (
+            <Categoria key={categoria.id} {...categoria} />
           ))}
+          {error && <p role="alert" className="sin-resultados">{error}</p>}
+          {cargando && <p className="sin-resultados">Cargando categorías...</p>}
+          {!cargando && !error && categorias.length === 0 && (
+            <p className="sin-resultados">No hay categorías disponibles.</p>
+          )}
         </div>
-        {error && <p role="alert">{error}</p>}
       </section>
+
+      <footer className="footer">
+        <div className="footer-contenido">
+          <span className="footer-logo">
+            OFICIO<span className="footer-logo-ya">YA</span>
+          </span>
+          <p className="footer-texto">
+            © 2026 OficioYa. Todos los derechos reservados.
+          </p>
+        </div>
+      </footer>
     </>
   )
 }

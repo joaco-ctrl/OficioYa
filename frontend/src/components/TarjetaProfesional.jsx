@@ -8,67 +8,102 @@ function TarjetaProfesional({ profesional, modo = 'resultado' }) {
 
   if (!profesional) return null
 
-  // MODO RESULTADO: tarjeta horizontal naranja con botones
+  const inicial = profesional.nombre.charAt(0).toUpperCase()
+
   if (modo === 'resultado') {
     return (
       <div className="tarjeta-resultado">
-        <div className="tarjeta-resultado-avatar">👤</div>
+        <div className="tarjeta-resultado-avatar">{inicial}</div>
         <div className="tarjeta-resultado-info">
           <h3>
             {profesional.nombre}
-            {profesional.verificado && <span className="check">✔</span>}
+            {profesional.verificado && (
+              <span className="badge-verificado">Verificado</span>
+            )}
           </h3>
-          <p className="oficio">{profesional.oficio}</p>
-          <p className="puntuacion">
-            {profesional.puntuacion != null && <>⭐ {profesional.puntuacion} / </>}
-            Zona: {profesional.zona}
-          </p>
+          <p className="oficio">{profesional.titulo || profesional.oficio}</p>
+          <div className="tarjeta-resultado-meta">
+            {profesional.puntuacion > 0 && (
+              <span className="puntuacion">{profesional.puntuacion} ★</span>
+            )}
+            <span className="separador">·</span>
+            <span>{profesional.zona}</span>
+            {profesional.trabajosRealizados != null && (
+              <>
+                <span className="separador">·</span>
+                <span>{profesional.trabajosRealizados} trabajos</span>
+              </>
+            )}
+          </div>
         </div>
         <div className="tarjeta-resultado-acciones">
-          <button onClick={() => navigate(`/perfil/${profesional.id}`)}>VER PERFIL</button>
           <button onClick={() => navigate(`/perfil/${profesional.id}`)}>
-            SOLICITAR PRESUPUESTO
+            Ver perfil
+          </button>
+          <button
+            className="boton-secundario"
+            onClick={() => navigate(`/presupuesto/${profesional.servicioId}`)}
+          >
+            Solicitar presupuesto
           </button>
         </div>
       </div>
     )
   }
 
-  // MODO PERFIL: bloques naranjas apilados
-  const serviciosVisibles = verMasServicios
-    ? profesional.servicios
-    : profesional.servicios.slice(0, 2)
+  const servicios = profesional.servicios || []
+  const valoraciones = profesional.valoraciones || []
+  const serviciosVisibles = verMasServicios ? servicios : servicios.slice(0, 2)
 
   const valoracionesVisibles = verMasValoraciones
-    ? profesional.valoraciones
-    : profesional.valoraciones.slice(0, 1)
+    ? valoraciones
+    : valoraciones.slice(0, 1)
 
   return (
     <div className="perfil-contenedor">
       <div className="perfil-cabecera">
-        <div className="perfil-avatar">👤</div>
+        <div className="perfil-avatar">{inicial}</div>
         <div className="perfil-datos">
-          <h2>{profesional.nombre}</h2>
-          <p>{profesional.oficio}</p>
-          <p>
-            {profesional.puntuacion != null && <>⭐ {profesional.puntuacion} / </>}
-            Zona: {profesional.zona}
-          </p>
-          <p>Disponibilidad: {profesional.disponibilidad}</p>
+          <div className="perfil-nombre-fila">
+            <h2>{profesional.nombre}</h2>
+            {profesional.verificado && (
+              <span className="badge-verificado">Verificado</span>
+            )}
+          </div>
+          <p className="perfil-titulo">{profesional.titulo || profesional.oficio}</p>
+          <div className="perfil-meta">
+            {profesional.puntuacion > 0 && <span>{profesional.puntuacion} ★</span>}
+            <span className="separador">·</span>
+            <span>{profesional.zona}</span>
+            {profesional.trabajosRealizados != null && (
+              <>
+                <span className="separador">·</span>
+                <span>{profesional.trabajosRealizados} trabajos</span>
+              </>
+            )}
+          </div>
+          {profesional.disponibilidad && (
+            <p className="perfil-disponibilidad">
+              Disponibilidad: {profesional.disponibilidad}
+            </p>
+          )}
         </div>
       </div>
 
       <div className="perfil-bloque">
         <h3>Sobre mí</h3>
-        <p>{profesional.sobreMi}</p>
+        <p>{profesional.sobreMi || 'Este profesional todavía no agregó una descripción.'}</p>
       </div>
 
       <div className="perfil-bloque">
         <h3>Servicios ofrecidos</h3>
-        <ul>
+        <ul className="lista-servicios">
           {serviciosVisibles.map((s, i) => (
             <li key={i}>
-              - {s.nombre} ${s.precio.toLocaleString('es-AR')}
+              <span className="servicio-nombre">{s.nombre}</span>
+              <span className="servicio-precio">
+                {s.precio == null ? 'Consultar' : `$${Number(s.precio).toLocaleString('es-AR')}`}
+              </span>
             </li>
           ))}
         </ul>
@@ -77,7 +112,7 @@ function TarjetaProfesional({ profesional, modo = 'resultado' }) {
             className="ver-mas"
             onClick={() => setVerMasServicios(!verMasServicios)}
           >
-            {verMasServicios ? 'ver menos ▲' : 'ver más ▼'}
+            {verMasServicios ? 'Ver menos' : 'Ver más'}
           </button>
         )}
       </div>
@@ -85,32 +120,40 @@ function TarjetaProfesional({ profesional, modo = 'resultado' }) {
       <div className="perfil-bloque">
         <h3>Valoraciones</h3>
         {valoracionesVisibles.length === 0 ? (
-          <p>Sin valoraciones todavía.</p>
+          <p className="sin-valoraciones">Sin valoraciones todavía.</p>
         ) : (
-          <ul>
+          <ul className="lista-valoraciones">
             {valoracionesVisibles.map((v, i) => (
               <li key={i}>
-                {v.puntuacion}⭐ {v.usuario}: {v.comentario}
+                <div className="valoracion-header">
+                  <span className="valoracion-usuario">{v.usuario}</span>
+                  <span className="valoracion-puntuacion">
+                    {v.puntuacion} ★
+                  </span>
+                </div>
+                <p className="valoracion-comentario">{v.comentario}</p>
               </li>
             ))}
           </ul>
         )}
-        {profesional.valoraciones.length > 1 && (
+        {valoraciones.length > 1 && (
           <button
             className="ver-mas"
             onClick={() => setVerMasValoraciones(!verMasValoraciones)}
           >
-            {verMasValoraciones ? 'ver menos ▲' : 'ver más ▼'}
+            {verMasValoraciones ? 'Ver menos' : 'Ver más'}
           </button>
         )}
       </div>
 
-      <button
-        className="boton-solicitar"
-        onClick={() => navigate(`/presupuesto/${profesional.id}`)}
-      >
-        SOLICITAR PRESUPUESTO
-      </button>
+      {(profesional.servicioId || profesional.servicios?.[0]?.id) && (
+        <button
+          className="boton-solicitar"
+          onClick={() => navigate(`/presupuesto/${profesional.servicioId || profesional.servicios[0].id}`)}
+        >
+          Solicitar presupuesto
+        </button>
+      )}
     </div>
   )
 }

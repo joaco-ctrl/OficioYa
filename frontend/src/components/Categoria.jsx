@@ -6,7 +6,10 @@ function Categoria({ id, nombre }) {
   return (
     <button
       className="categoria"
-      onClick={() => navigate(`/resultados?oficio=${nombre}`)}
+      onClick={() => {
+        const params = new URLSearchParams({ categoria_id: id, oficio: nombre })
+        navigate(`/resultados?${params.toString()}`)
+      }}
     >
       <span className="categoria-nombre">{nombre}</span>
     </button>

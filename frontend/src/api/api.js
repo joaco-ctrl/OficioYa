@@ -1,37 +1,18 @@
-import axios from 'axios';
+import axios from 'axios'
 
-const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-});
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
 
-client.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('oficioya_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
 
-const api = {
-  get: async (path) => {
-    const { data } = await client.get(path);
-    return data;
-  },
-  post: async (path, body) => {
-    const { data } = await client.post(path, body);
-    return data;
-  },
-  put: async (path, body) => {
-    const { data } = await client.put(path, body);
-    return data;
-  },
-  delete: async (path) => {
-    const { data } = await client.delete(path);
-    return data;
-  },
-};
-
-export default api;
+export default api

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Encabezado from '../components/Encabezado.jsx'
 import TarjetaProfesional from '../components/TarjetaProfesional.jsx'
 import api from '../api/api.js'
-import { obtenerMensajeError } from '../utilidades/mensajeError.js'
+import { mensajeError } from '../utilidades/mensajeError.js'
 
 function PerfilProfesional() {
   const { id } = useParams()
@@ -13,45 +13,84 @@ function PerfilProfesional() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    setCargando(true)
-    setError('')
-    api.get(`/profesionales/${id}`)
-      .then((perfil) => setProfesional({
-        id: perfil.profesional_id,
-        nombre: `${perfil.nombre} ${perfil.apellido}`,
-        oficio: 'Profesional',
-        zona: perfil.zona || 'Sin zona informada',
-        disponibilidad: perfil.disponibilidad || 'Sin disponibilidad informada',
-        sobreMi: perfil.biografia || 'Sin descripción disponible.',
-        puntuacion: null,
-        servicios: [],
-        valoraciones: [],
-      }))
-      .catch((error) => setError(obtenerMensajeError(error, 'No se pudo cargar el perfil profesional.')))
-      .finally(() => setCargando(false))
-  }, [id])
+    let vigente = true
 
-  if (cargando || error || !profesional) {
-    return (
-      <>
-        <Encabezado mostrarPerfil={true} />
-        <div className="seccion">
-          <p>{cargando ? 'Cargando perfil...' : error || 'Profesional no encontrado.'}</p>
-          <button onClick={() => navigate('/resultados')}>Volver a resultados</button>
-        </div>
-      </>
-    )
-  }
+    const cargarPerfil = async () => {
+      setCargando(true)
+      setError('')
+
+      try {
+        const [perfilResponse, serviciosResponse, valoracionesResponse, promedioResponse] = await Promise.all([
+          api.get(`/profesionales/${id}`),
+          api.get('/servicios'),
+          api.get(`/valoraciones/profesional/${id}`),
+          api.get(`/valoraciones/profesional/${id}/promedio`)
+        ])
+        const perfil = perfilResponse.data
+        const servicios = serviciosResponse.data
+          .filter((servicio) => Number(servicio.profesional_id) === Number(id))
+          .map((servicio) => ({
+            id: Number(servicio.servicio_id),
+            nombre: servicio.titulo,
+            precio: Number(servicio.precio) || 0
+          }))
+
+        if (vigente) {
+          setProfesional({
+            id: Number(perfil.profesional_id),
+            servicioId: servicios[0]?.id,
+            nombre: `${perfil.nombre} ${perfil.apellido}`.trim(),
+            oficio: serviciosResponse.data.find(
+              (servicio) => Number(servicio.profesional_id) === Number(id)
+            )?.categoria_nombre || 'Profesional',
+            titulo: servicios[0]?.nombre || 'Profesional',
+            zona: perfil.zona || 'Zona no especificada',
+            disponibilidad: perfil.disponibilidad,
+            verificado: Boolean(perfil.verificado),
+            puntuacion: Number(promedioResponse.data?.promedio) || 0,
+            trabajosRealizados: null,
+            sobreMi: perfil.biografia,
+            servicios,
+            valoraciones: valoracionesResponse.data.map((valoracion) => ({
+              usuario: `${valoracion.usuario_nombre} ${valoracion.usuario_apellido}`.trim(),
+              puntuacion: Number(valoracion.puntuacion),
+              comentario: valoracion.comentario || ''
+            }))
+          })
+        }
+      } catch (requestError) {
+        if (vigente) setError(mensajeError(requestError, 'No se pudo cargar el perfil.'))
+      } finally {
+        if (vigente) setCargando(false)
+      }
+    }
+
+    cargarPerfil()
+    return () => {
+      vigente = false
+    }
+  }, [id])
 
   return (
     <>
-      <Encabezado mostrarPerfil={true} />
-
-      <button className="volver-resultados" onClick={() => navigate(-1)}>
-        ← VOLVER A RESULTADOS
-      </button>
-
-      <TarjetaProfesional profesional={profesional} modo="perfil" />
+      <Encabezado mostrarAuth={true} />
+      {cargando ? (
+        <p className="sin-resultados">Cargando perfil...</p>
+      ) : error ? (
+        <div className="seccion" role="alert" style={{ textAlign: 'center', padding: '60px 24px' }}>
+          <p>{error}</p>
+          <button onClick={() => navigate('/resultados')} style={{ marginTop: '16px', color: '#f28c28', fontWeight: 600 }}>
+            Volver a resultados
+          </button>
+        </div>
+      ) : profesional ? (
+        <>
+          <button className="volver-resultados" onClick={() => navigate(-1)}>
+            ← VOLVER A RESULTADOS
+          </button>
+          <TarjetaProfesional profesional={profesional} modo="perfil" />
+        </>
+      ) : null}
     </>
   )
 }

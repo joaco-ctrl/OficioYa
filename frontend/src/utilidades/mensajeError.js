@@ -1,7 +1,9 @@
-export function obtenerMensajeError(error, mensajePredeterminado) {
-	return error.response?.data?.error
-		|| error.response?.data?.message
-		|| error.response?.data?.mensaje
-		|| error.message
-		|| mensajePredeterminado
+export function mensajeError(error, mensajePredeterminado = 'Ocurrió un error. Intentá nuevamente.') {
+  return (
+    error.response?.data?.mensaje ||
+    error.response?.data?.error ||
+    error.response?.data?.message ||
+    error.message ||
+    mensajePredeterminado
+  )
 }

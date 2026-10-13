@@ -17,14 +17,14 @@ const valoracionesRoutes = require('./routes/valoracionesRoutes');
 app.use(cors());
 app.use(express.json());
 
-app.use('/auth', authRoutes);
-app.use('/categorias', categoriasRoutes);
-app.use('/contratos', contratosRoutes);
-app.use('/profesionales', profesionalRoutes);
-app.use('/presupuestos', presupuestosRoutes);
-app.use('/reportes', reportesRoutes);
-app.use('/servicios', serviciosRoutes);
-app.use('/valoraciones', valoracionesRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/categorias', categoriasRoutes);
+app.use('/api/contratos', contratosRoutes);
+app.use('/api/profesionales', profesionalRoutes);
+app.use('/api/presupuestos', presupuestosRoutes);
+app.use('/api/reportes', reportesRoutes);
+app.use('/api/servicios', serviciosRoutes);
+app.use('/api/valoraciones', valoracionesRoutes);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Servidor corriendo en http://localhost:${process.env.PORT || 3000}`);
