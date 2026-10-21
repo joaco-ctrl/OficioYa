@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Encabezado from '../components/Encabezado.jsx'
+import NavegacionPerfil from '../components/NavegacionPerfil.jsx'
 import api from '../api/api.js'
 import { mensajeError } from '../utilidades/mensajeError.js'
 
@@ -18,6 +19,7 @@ function MisSolicitudes() {
   const [filtroEstado, setFiltroEstado] = useState('todas')
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
+  const [aceptando, setAceptando] = useState(null)
 
   useEffect(() => {
     let vigente = true
@@ -52,9 +54,23 @@ function MisSolicitudes() {
     precio == null ? 'A definir' : `$${Number(precio).toLocaleString('es-AR')}`
   )
 
+  const aceptarPresupuesto = async (solicitud) => {
+    setError('')
+    setAceptando(solicitud.id)
+    try {
+      await api.patch(`/presupuestos/${solicitud.id}/aceptar`)
+      navigate('/mis-contratos')
+    } catch (requestError) {
+      setError(mensajeError(requestError, 'No se pudo aceptar el presupuesto.'))
+    } finally {
+      setAceptando(null)
+    }
+  }
+
   return (
     <>
       <Encabezado mostrarAuth={true} />
+      <NavegacionPerfil />
       <div className="solicitudes-contenedor">
         <div className="solicitudes-header">
           <div>
@@ -97,7 +113,6 @@ function MisSolicitudes() {
               <button
                 className="boton boton-naranja"
                 onClick={() => navigate('/resultados')}
-                style={{ marginTop: '20px' }}
               >
                 Buscar profesionales
               </button>
@@ -138,6 +153,15 @@ function MisSolicitudes() {
                   <span className="solicitud-fecha">
                     Enviada el {formatearFecha(solicitud.created_at)}
                   </span>
+                  {solicitud.estado === 'respondido' && (
+                    <button
+                      className="boton boton-naranja"
+                      disabled={aceptando === solicitud.id}
+                      onClick={() => aceptarPresupuesto(solicitud)}
+                    >
+                      {aceptando === solicitud.id ? 'Aceptando...' : 'Aceptar presupuesto'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))

@@ -7,6 +7,7 @@ const {
     crearServicio,
     actualizarServicio,
     eliminarServicio,
+    actualizarEstadoServicio,
     obtenerMisServicios
 } = require('../controllers/serviciosController');
 
@@ -16,6 +17,7 @@ router.get('/:id', obtenerServicioPorId);
 router.post('/', verificarToken, esProfesional, crearServicio);
 router.get('/mis-servicios/lista', verificarToken, esProfesional, obtenerMisServicios);
 router.put('/:id', verificarToken, esProfesional, actualizarServicio);
+router.patch('/:id/estado', verificarToken, esProfesional, actualizarEstadoServicio);
 router.delete('/:id', verificarToken, esProfesional, eliminarServicio);
 
 module.exports = router;

@@ -12,12 +12,16 @@ const obtenerMisContratos = (usuarioId, callback) => {
             u.nombre AS profesional_nombre,
             u.apellido AS profesional_apellido,
             s.id AS servicio_id,
-            s.titulo AS servicio_titulo
+            s.titulo AS servicio_titulo,
+            v.id AS valoracion_id,
+            v.puntuacion AS valoracion_puntuacion,
+            v.comentario AS valoracion_comentario
         FROM contratacion c
         INNER JOIN presupuestos pr ON pr.id = c.presupuesto_id
         INNER JOIN servicios s ON s.id = pr.servicio_id
         INNER JOIN profesionales p ON p.id = s.profesional_id
         INNER JOIN usuarios u ON u.id = p.user_id
+        LEFT JOIN valoraciones v ON v.contratacion_id = c.id
         WHERE pr.user_id = ?
         ORDER BY c.id DESC
     `;

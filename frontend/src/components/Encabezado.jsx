@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import logo from '../assets/logo.png'
 
-function Encabezado({ textoDerecha = '', rutaDerecha = -1, mostrarPerfil = false, mostrarAuth = false }) {
+function Encabezado({ textoDerecha = '', rutaDerecha = -1, mostrarAuth = false }) {
   const navigate = useNavigate()
   const [logueado, setLogueado] = useState(() => Boolean(localStorage.getItem('oficioya_token')))
 
@@ -20,25 +20,14 @@ function Encabezado({ textoDerecha = '', rutaDerecha = -1, mostrarPerfil = false
 
   return (
     <header className="encabezado">
-      <div
-        className="encabezado-logo"
-        onClick={() => navigate('/')}
-        style={{ cursor: 'pointer' }}
-      >
+      <Link to="/" className="encabezado-logo">
         <img src={logo} alt="OficioYa" />
         <span className="logo-texto">
           OFICIO<span className="logo-ya">YA</span>
         </span>
-      </div>
+      </Link>
 
       <div className="encabezado-derecha">
-        {/* Si está logueado → PERFIL */}
-        {mostrarPerfil && (
-          <button className="encabezado-perfil" onClick={() => navigate('/perfil')}>
-            <span className="icono-perfil">👤</span> PERFIL
-          </button>
-        )}
-
         {/* Si NO está logueado → Iniciar Sesión + Registrarse */}
         {mostrarAuth && !logueado && (
           <>
@@ -50,14 +39,15 @@ function Encabezado({ textoDerecha = '', rutaDerecha = -1, mostrarPerfil = false
             </Link>
           </>
         )}
-        {mostrarAuth && logueado && (
-          <button className="encabezado-link" onClick={cerrarSesion}>
-            Cerrar sesión
-          </button>
+        {logueado && (
+          <>
+            <Link to="/mi-perfil" className="encabezado-link">Mi perfil</Link>
+            <button className="encabezado-link" onClick={cerrarSesion}>Cerrar sesión</button>
+          </>
         )}
 
         {/* Botón de acción (Volver, etc.) */}
-        {!mostrarPerfil && !mostrarAuth && textoDerecha && (
+        {!mostrarAuth && textoDerecha && (
           <button className="encabezado-accion" onClick={handleClick}>
             {textoDerecha}
           </button>

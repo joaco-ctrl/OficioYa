@@ -11,7 +11,7 @@ const crearServicio = (datosServicio, callback) => {
 
   conexion.query(
     sql,
-    [profesional_id, categoria_id, titulo, descripcion || null, precio || null],
+    [profesional_id, categoria_id, titulo, descripcion || null, precio ?? null],
     (err, result) => {
       if (err) return callback(err, null);
       
@@ -49,6 +49,8 @@ const buscarServicios = (filtros = {}, callback) => {
     INNER JOIN profesionales p ON s.profesional_id = p.id
     INNER JOIN usuarios u ON p.user_id = u.id
     WHERE s.activo = 1
+      AND u.activo = 1
+      AND u.deleted_at IS NULL
   `;
 
   const params = [];
@@ -95,7 +97,10 @@ const obtenerServicioPorId = (servicioId, callback) => {
     INNER JOIN categorias c ON s.categoria_id = c.id
     INNER JOIN profesionales p ON s.profesional_id = p.id
     INNER JOIN usuarios u ON p.user_id = u.id
-    WHERE s.id = ? AND s.activo = 1
+    WHERE s.id = ?
+      AND s.activo = 1
+      AND u.activo = 1
+      AND u.deleted_at IS NULL
   `;
 
   conexion.query(sql, [servicioId], (err, rows) => {
@@ -161,11 +166,25 @@ const eliminarServicio = (servicioId, profesionalId, callback) => {
   });
 };
 
+const actualizarEstadoServicio = (servicioId, profesionalId, activo, callback) => {
+  const sql = `
+    UPDATE servicios
+    SET activo = ?
+    WHERE id = ? AND profesional_id = ?
+  `;
+
+  conexion.query(sql, [activo, servicioId, profesionalId], (err, result) => {
+    if (err) return callback(err, null);
+    return callback(null, result.affectedRows > 0);
+  });
+};
+
 module.exports = {
   crearServicio,
   buscarServicios,
   obtenerServicioPorId,
   obtenerServiciosPorProfesional,
   actualizarServicio,
-  eliminarServicio
+  eliminarServicio,
+  actualizarEstadoServicio
 };

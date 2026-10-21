@@ -21,7 +21,10 @@ function TarjetaProfesional({ profesional, modo = 'resultado' }) {
               <span className="badge-verificado">Verificado</span>
             )}
           </h3>
-          <p className="oficio">{profesional.titulo || profesional.oficio}</p>
+          <p className="oficio">{profesional.oficio}</p>
+          <p className="servicio-resumen">
+            {profesional.servicios.map((servicio) => servicio.nombre).join(' · ')}
+          </p>
           <div className="tarjeta-resultado-meta">
             {profesional.puntuacion > 0 && (
               <span className="puntuacion">{profesional.puntuacion} ★</span>
@@ -107,7 +110,7 @@ function TarjetaProfesional({ profesional, modo = 'resultado' }) {
             </li>
           ))}
         </ul>
-        {profesional.servicios.length > 2 && (
+        {servicios.length > 2 && (
           <button
             className="ver-mas"
             onClick={() => setVerMasServicios(!verMasServicios)}

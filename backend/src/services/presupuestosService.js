@@ -21,14 +21,25 @@ const crearPresupuesto = (datosPresupuesto, callback) => {
             condiciones,
             monto_estimado,
             estado
-        ) VALUES (?, ?, ?, ?, ?, 'pendiente')
+        )
+        SELECT ?, s.id, ?, ?, ?, 'pendiente'
+        FROM servicios s
+        INNER JOIN profesionales pr ON pr.id = s.profesional_id
+        INNER JOIN usuarios u ON u.id = pr.user_id
+        WHERE s.id = ?
+            AND s.activo = 1
+            AND u.activo = 1
+            AND u.deleted_at IS NULL
     `;
 
     conexion.query(
         sql,
-        [user_id, servicio_id, descripcion, condiciones || null, monto_estimado || null],
+        [user_id, descripcion, condiciones || null, monto_estimado ?? null, servicio_id],
         (err, result) => {
             if (err) return callback(err, null);
+            if (result.affectedRows === 0) {
+                return callback(new Error('El servicio ya no está disponible'), null);
+            }
 
             return callback(null, {
                 id: result.insertId,

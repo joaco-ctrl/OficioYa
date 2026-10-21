@@ -32,7 +32,7 @@ function PerfilProfesional() {
           .map((servicio) => ({
             id: Number(servicio.servicio_id),
             nombre: servicio.titulo,
-            precio: Number(servicio.precio) || 0
+            precio: servicio.precio == null ? null : Number(servicio.precio)
           }))
 
         if (vigente) {
@@ -77,9 +77,9 @@ function PerfilProfesional() {
       {cargando ? (
         <p className="sin-resultados">Cargando perfil...</p>
       ) : error ? (
-        <div className="seccion" role="alert" style={{ textAlign: 'center', padding: '60px 24px' }}>
+        <div className="seccion perfil-error" role="alert">
           <p>{error}</p>
-          <button onClick={() => navigate('/resultados')} style={{ marginTop: '16px', color: '#f28c28', fontWeight: 600 }}>
+          <button className="boton boton-naranja" onClick={() => navigate('/resultados')}>
             Volver a resultados
           </button>
         </div>

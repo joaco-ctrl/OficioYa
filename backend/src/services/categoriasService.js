@@ -3,16 +3,18 @@ const conexion = require("../config/database")
 
 function crearCategorias(data, callback) {
     const { nombre, descripcion } = data
-    if (!nombre) {
+    const nombreLimpio = String(nombre || '').trim()
+    const descripcionLimpia = descripcion == null ? null : String(descripcion).trim()
+
+    if (!nombreLimpio) {
         return callback(new Error("nombre incompleto"))
-    } else {
-        conexion.query
-            (
-                "INSERT INTO categorias (nombre, descripcion) VALUES (?, ?)",
-                [nombre, descripcion],
-                callback
-            )
     }
+
+    conexion.query(
+        "INSERT INTO categorias (nombre, descripcion) VALUES (?, ?)",
+        [nombreLimpio, descripcionLimpia || null],
+        callback
+    )
 }
 
 function obtenerCategoriasPorId(id, callback) {
@@ -42,17 +44,20 @@ function borrarCategorias(data, callback) {
 }
 
 function actualizarCategorias(data, callback){
-    const {  nombre, descripcion } = data
+    const { nombre, descripcion } = data
     const id = Number(data.id)
-    if (!Number.isInteger(id) || id <= 0 || !nombre) {
+    const nombreLimpio = String(nombre || '').trim()
+    const descripcionLimpia = descripcion == null ? null : String(descripcion).trim()
+
+    if (!Number.isInteger(id) || id <= 0 || !nombreLimpio) {
         return callback(new Error("datos incompletos"))
-    }else{
-        conexion.query(
-            "UPDATE categorias SET nombre = ?, descripcion = ? WHERE id = ?",
-            [nombre, descripcion, id],
-            callback
-        )
     }
+
+    conexion.query(
+        "UPDATE categorias SET nombre = ?, descripcion = ? WHERE id = ?",
+        [nombreLimpio, descripcionLimpia || null, id],
+        callback
+    )
 }
 
 

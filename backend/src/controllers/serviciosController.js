@@ -125,11 +125,34 @@ const eliminarServicio = (req, res) => {
   });
 };
 
+const actualizarEstadoServicio = (req, res) => {
+  if (typeof req.body.activo !== 'boolean') {
+    return res.status(400).json({ mensaje: 'El estado activo debe ser verdadero o falso' });
+  }
+
+  serviciosService.actualizarEstadoServicio(
+    req.params.id,
+    req.profesional_id,
+    req.body.activo,
+    (err, actualizado) => {
+      if (err) {
+        console.error('Error al cambiar el estado del servicio:', err);
+        return res.status(500).json({ mensaje: 'Error al cambiar el estado del servicio' });
+      }
+      if (!actualizado) {
+        return res.status(404).json({ mensaje: 'Servicio no encontrado o no pertenece al profesional' });
+      }
+      return res.status(200).json({ mensaje: req.body.activo ? 'Servicio activado' : 'Servicio desactivado' });
+    }
+  );
+};
+
 module.exports = {
   crearServicio,
   buscarServicios,
   obtenerServicioPorId,
   obtenerMisServicios,
   actualizarServicio,
-  eliminarServicio
+  eliminarServicio,
+  actualizarEstadoServicio
 };

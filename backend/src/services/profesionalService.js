@@ -37,7 +37,7 @@ const obtenerPerfilPublicoProfesional = (profesionalId, callback) => {
             p.confianza
         FROM usuarios u
         INNER JOIN profesionales p ON p.user_id = u.id
-        WHERE p.id = ?
+        WHERE p.id = ? AND u.activo = 1 AND u.deleted_at IS NULL
     `;
 
     conexion.query(sql, [profesionalId], (err, rows) => {

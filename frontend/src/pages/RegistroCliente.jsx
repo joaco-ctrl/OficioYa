@@ -50,10 +50,10 @@ function RegistroCliente() {
         <Tarjeta ancho="480px">
           <h1>Crear cuenta de Cliente</h1>
           <form onSubmit={handleSubmit}>
-            <CampoTexto label="NOMBRE" nombre="nombre" valor={datos.nombre} onChange={handleChange} />
-            <CampoTexto label="APELLIDO" nombre="apellido" valor={datos.apellido} onChange={handleChange} />
-            <CampoTexto label="EMAIL" nombre="email" tipo="email" valor={datos.email} onChange={handleChange} />
-            <CampoTexto label="CONTRASEÑA" nombre="contrasena" tipo="password" valor={datos.contrasena} onChange={handleChange} />
+            <CampoTexto label="NOMBRE" nombre="nombre" valor={datos.nombre} onChange={handleChange} requerido />
+            <CampoTexto label="APELLIDO" nombre="apellido" valor={datos.apellido} onChange={handleChange} requerido />
+            <CampoTexto label="EMAIL" nombre="email" tipo="email" valor={datos.email} onChange={handleChange} requerido />
+            <CampoTexto label="CONTRASEÑA" nombre="contrasena" tipo="password" valor={datos.contrasena} onChange={handleChange} requerido />
             {error && <p role="alert" className="sin-resultados">{error}</p>}
             <Boton texto={enviando ? 'CREANDO CUENTA...' : 'CREAR CUENTA'} tipo="submit" variante="azul" />
           </form>

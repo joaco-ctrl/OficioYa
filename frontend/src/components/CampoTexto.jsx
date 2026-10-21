@@ -1,4 +1,4 @@
-function CampoTexto({ label, tipo = 'text', nombre, valor, onChange }) {
+function CampoTexto({ label, tipo = 'text', nombre, valor, onChange, requerido = false }) {
   return (
     <div className="campo">
       <label htmlFor={nombre}>{label}</label>
@@ -6,6 +6,7 @@ function CampoTexto({ label, tipo = 'text', nombre, valor, onChange }) {
         id={nombre}
         name={nombre}
         type={tipo}
+        required={requerido}
         value={valor}
         onChange={onChange}
       />

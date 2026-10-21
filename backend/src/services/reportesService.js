@@ -8,33 +8,25 @@ const crearReporte = (datosReporte, callback) => {
     }
 
     const sql = `
-        SELECT c.id, pr.user_id AS usuario_id
+        INSERT INTO reportes (contratacion_id, descripcion, estado)
+        SELECT c.id, ?, 'pendiente'
         FROM contratacion c
         INNER JOIN presupuestos pr ON pr.id = c.presupuesto_id
-        WHERE c.id = ? AND pr.user_id = ?
+        WHERE c.id = ? AND pr.user_id = ? AND c.estado = 'en_proceso'
     `;
 
-    conexion.query(sql, [contratacion_id, datosReporte.usuario_id], (err, rows) => {
+    conexion.query(sql, [descripcion, contratacion_id, datosReporte.usuario_id], (err, result) => {
         if (err) return callback(err, null);
 
-        if (rows.length === 0) {
+        if (result.affectedRows === 0) {
             return callback(new Error('La contratación no existe o no pertenece al usuario'), null);
         }
 
-        const reporteSql = `
-            INSERT INTO reportes (contratacion_id, descripcion, estado)
-            VALUES (?, ?, 'pendiente')
-        `;
-
-        conexion.query(reporteSql, [contratacion_id, descripcion], (err, result) => {
-            if (err) return callback(err, null);
-
-            return callback(null, {
-                id: result.insertId,
-                contratacion_id,
-                descripcion,
-                estado: 'pendiente'
-            });
+        return callback(null, {
+            id: result.insertId,
+            contratacion_id,
+            descripcion,
+            estado: 'pendiente'
         });
     });
 };
@@ -66,8 +58,19 @@ const obtenerReportesPendientes = (callback) => {
             r.contratacion_id,
             r.descripcion,
             r.estado,
-            r.created_at
+            r.created_at,
+            cliente.nombre AS usuario_nombre,
+            cliente.apellido AS usuario_apellido,
+            profesional.nombre AS profesional_nombre,
+            profesional.apellido AS profesional_apellido,
+            s.titulo AS servicio_titulo
         FROM reportes r
+        INNER JOIN contratacion c ON c.id = r.contratacion_id
+        INNER JOIN presupuestos p ON p.id = c.presupuesto_id
+        INNER JOIN servicios s ON s.id = p.servicio_id
+        INNER JOIN profesionales pr ON pr.id = s.profesional_id
+        INNER JOIN usuarios profesional ON profesional.id = pr.user_id
+        INNER JOIN usuarios cliente ON cliente.id = p.user_id
         WHERE r.estado = 'pendiente'
         ORDER BY r.id DESC
     `;

@@ -46,7 +46,8 @@ function RegistroProfesional() {
         password: datos.contrasena,
         telefono: datos.telefono,
         zona: datos.zona,
-        disponibilidad: datos.horarios
+        disponibilidad: datos.horarios,
+        categoria_id: Number(datos.categoriaId)
       })
     } catch (requestError) {
       setError(mensajeError(requestError, 'No se pudo crear la cuenta profesional.'))
@@ -61,15 +62,10 @@ function RegistroProfesional() {
       })
       localStorage.setItem('oficioya_token', login.token)
       localStorage.setItem('oficioya_usuario', JSON.stringify(login.usuario))
-
-      await api.post('/servicios', {
-        categoria_id: Number(datos.categoriaId),
-        titulo: categorias.find((categoria) => String(categoria.id) === datos.categoriaId).nombre
-      })
-      navigate('/', { replace: true })
+      navigate('/mi-perfil', { replace: true })
     } catch (requestError) {
       setError(
-        `La cuenta fue creada, pero no se pudo publicar el servicio. ${mensajeError(requestError)}`
+        `La cuenta y el servicio fueron creados, pero no se pudo iniciar sesión. ${mensajeError(requestError)}`
       )
     } finally {
       setEnviando(false)
@@ -83,10 +79,10 @@ function RegistroProfesional() {
         <Tarjeta ancho="900px">
           <h1>Crear cuenta de Profesional</h1>
           <form onSubmit={handleSubmit} className="form-profesional">
-            <CampoTexto label="NOMBRE" nombre="nombre" valor={datos.nombre} onChange={handleChange} />
-            <CampoTexto label="APELLIDO" nombre="apellido" valor={datos.apellido} onChange={handleChange} />
-            <CampoTexto label="EMAIL" nombre="email" tipo="email" valor={datos.email} onChange={handleChange} />
-            <CampoTexto label="CONTRASEÑA" nombre="contrasena" tipo="password" valor={datos.contrasena} onChange={handleChange} />
+            <CampoTexto label="NOMBRE" nombre="nombre" valor={datos.nombre} onChange={handleChange} requerido />
+            <CampoTexto label="APELLIDO" nombre="apellido" valor={datos.apellido} onChange={handleChange} requerido />
+            <CampoTexto label="EMAIL" nombre="email" tipo="email" valor={datos.email} onChange={handleChange} requerido />
+            <CampoTexto label="CONTRASEÑA" nombre="contrasena" tipo="password" valor={datos.contrasena} onChange={handleChange} requerido />
             <CampoTexto label="ZONA DE COBERTURA" nombre="zona" valor={datos.zona} onChange={handleChange} />
             <CampoTexto label="TELÉFONO" nombre="telefono" valor={datos.telefono} onChange={handleChange} />
             <CampoTexto label="HORARIOS" nombre="horarios" valor={datos.horarios} onChange={handleChange} />

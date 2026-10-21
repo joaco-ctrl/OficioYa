@@ -30,10 +30,49 @@ function usuarioRegistro(data, callback) {
     )
 }
 
+function obtenerPerfilUsuario(usuarioId, callback) {
+  conexion.query(
+    'SELECT id, nombre, apellido, telefono, email, rol FROM usuarios WHERE id = ? AND activo = 1 AND deleted_at IS NULL',
+    [usuarioId],
+    (err, rows) => callback(err, rows?.[0] || null)
+  );
+}
+
+function actualizarPerfilUsuario(usuarioId, datos, callback) {
+  const { nombre, apellido, telefono } = datos;
+  if (![nombre, apellido, telefono].some((valor) => valor !== undefined)) {
+    return callback(new Error('No se recibieron campos para actualizar'), null);
+  }
+
+  const campos = [];
+  const valores = [];
+  if (nombre !== undefined) {
+    campos.push('nombre = ?');
+    valores.push(nombre);
+  }
+  if (apellido !== undefined) {
+    campos.push('apellido = ?');
+    valores.push(apellido);
+  }
+  if (telefono !== undefined) {
+    campos.push('telefono = ?');
+    valores.push(telefono || null);
+  }
+
+  conexion.query(
+    `UPDATE usuarios SET ${campos.join(', ')} WHERE id = ?`,
+    [...valores, usuarioId],
+    (err) => {
+      if (err) return callback(err, null);
+      obtenerPerfilUsuario(usuarioId, callback);
+    }
+  );
+}
+
 const profesionalRegistro = async (data) => {
   const { 
     nombre, apellido, telefono, email, password, 
-    biografia, zona, disponibilidad, documento_url} = data;
+    biografia, zona, disponibilidad, documento_url, categoria_id} = data;
     
   const connection = await conexion.promise().getConnection();
 
@@ -56,9 +95,23 @@ const profesionalRegistro = async (data) => {
       INSERT INTO profesionales (user_id, biografia, zona, disponibilidad, documento_url)
       VALUES (?, ?, ?, ?, ?)
     `;
-    await connection.query(sqlProfesional, [
+    const [resultProfesional] = await connection.query(sqlProfesional, [
       userId, biografia || null, zona || null, disponibilidad || null, documento_url || null
     ]);
+    const profesionalId = resultProfesional.insertId;
+
+    const [categorias] = await connection.query(
+      'SELECT nombre FROM categorias WHERE id = ?',
+      [categoria_id]
+    );
+    if (categorias.length === 0) {
+      throw new Error('La categoría seleccionada no existe');
+    }
+
+    await connection.query(
+      'INSERT INTO servicios (profesional_id, categoria_id, titulo) VALUES (?, ?, ?)',
+      [profesionalId, categoria_id, categorias[0].nombre]
+    );
 
     await connection.commit();
 
@@ -79,5 +132,7 @@ const profesionalRegistro = async (data) => {
 module.exports = {
     login,
     usuarioRegistro,
-    profesionalRegistro
+  profesionalRegistro,
+  obtenerPerfilUsuario,
+  actualizarPerfilUsuario
 }

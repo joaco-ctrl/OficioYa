@@ -71,16 +71,42 @@ function usuarioRegistro(req, res) {
     });
 }
 
+function obtenerMiPerfil(req, res) {
+    authService.obtenerPerfilUsuario(req.usuario.id, (err, perfil) => {
+        if (err) return res.status(500).json({ mensaje: 'Error al consultar el perfil' });
+        if (!perfil) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+        return res.status(200).json(perfil);
+    });
+}
+
+function actualizarMiPerfil(req, res) {
+    const { nombre, apellido, telefono } = req.body;
+    if ((nombre !== undefined && !String(nombre).trim()) || (apellido !== undefined && !String(apellido).trim())) {
+        return res.status(400).json({ mensaje: 'Nombre y apellido no pueden estar vacíos' });
+    }
+
+    authService.actualizarPerfilUsuario(req.usuario.id, { nombre, apellido, telefono }, (err, perfil) => {
+        if (err) return res.status(400).json({ mensaje: err.message || 'Error al actualizar el perfil' });
+        if (!perfil) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+        return res.status(200).json({ mensaje: 'Perfil actualizado correctamente', perfil });
+    });
+}
+
 
    const profesionalRegistro = async (req, res) => {
   try {
     const { nombre, apellido, email, password } = req.body;
+        const categoria_id = Number(req.body.categoria_id);
 
     if (!nombre || !apellido || !email || !password) {
       return res.status(400).json({ message: 'Todos los campos obligatorios deben ser completados.' });
     }
 
-    const nuevoProfesional = await authService.profesionalRegistro(req.body);
+        if (!Number.isInteger(categoria_id) || categoria_id <= 0) {
+            return res.status(400).json({ message: 'Seleccioná una categoría válida para tu servicio.' });
+        }
+
+        const nuevoProfesional = await authService.profesionalRegistro({ ...req.body, categoria_id });
 
     return res.status(201).json({
       message: 'Profesional registrado con éxito',
@@ -102,5 +128,7 @@ function usuarioRegistro(req, res) {
 module.exports = {
     login,
     usuarioRegistro,
-    profesionalRegistro
+    profesionalRegistro,
+    obtenerMiPerfil,
+    actualizarMiPerfil
 }

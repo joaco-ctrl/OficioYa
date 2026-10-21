@@ -7,8 +7,9 @@ const crearValoracion = (datosValoracion, callback) => {
         return callback(new Error('La contratación, el usuario y la puntuación son obligatorios'), null);
     }
 
-    if (puntuacion < 1 || puntuacion > 5) {
-        return callback(new Error('La puntuación debe estar entre 1 y 5'), null);
+    const puntuacionNumerica = Number(puntuacion);
+    if (!Number.isInteger(puntuacionNumerica) || puntuacionNumerica < 1 || puntuacionNumerica > 5) {
+        return callback(new Error('La puntuación debe ser un entero entre 1 y 5'), null);
     }
 
     const sql = `
@@ -30,7 +31,7 @@ const crearValoracion = (datosValoracion, callback) => {
             VALUES (?, ?, ?)
         `;
 
-        conexion.query(valoracionSql, [contratacion_id, puntuacion, comentario || null], (err, result) => {
+        conexion.query(valoracionSql, [contratacion_id, puntuacionNumerica, comentario || null], (err, result) => {
             if (err) {
                 if (err.code === 'ER_DUP_ENTRY') {
                     return callback(new Error('La contratación ya tiene una valoración'), null);
@@ -41,7 +42,7 @@ const crearValoracion = (datosValoracion, callback) => {
             return callback(null, {
                 id: result.insertId,
                 contratacion_id,
-                puntuacion,
+                puntuacion: puntuacionNumerica,
                 comentario,
                 fecha: new Date().toISOString()
             });

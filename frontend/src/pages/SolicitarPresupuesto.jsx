@@ -88,9 +88,9 @@ function SolicitarPresupuesto() {
     return (
       <>
         <Encabezado mostrarAuth={true} />
-        <div className="seccion" role="alert" style={{ textAlign: 'center', padding: '60px 24px' }}>
+        <div className="seccion perfil-error" role="alert">
           <p>{error}</p>
-          <button className="boton boton-naranja" onClick={() => navigate('/resultados')} style={{ marginTop: '20px' }}>
+          <button className="boton boton-naranja" onClick={() => navigate('/resultados')}>
             Volver a resultados
           </button>
         </div>

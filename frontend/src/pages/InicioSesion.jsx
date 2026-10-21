@@ -30,9 +30,7 @@ function InicioSesion() {
       })
       localStorage.setItem('oficioya_token', data.token)
       localStorage.setItem('oficioya_usuario', JSON.stringify(data.usuario))
-      const destino = location.state?.from || (
-        data.usuario.rol === 'cliente' ? '/mis-solicitudes' : '/'
-      )
+      const destino = location.state?.from || '/'
       navigate(destino, { replace: true })
     } catch (requestError) {
       setError(mensajeError(requestError, 'No se pudo iniciar sesión.'))
@@ -57,6 +55,7 @@ function InicioSesion() {
               tipo="email"
               valor={datos.email}
               onChange={handleChange}
+              requerido
             />
             <CampoTexto
               label="CONTRASEÑA"
@@ -64,11 +63,12 @@ function InicioSesion() {
               tipo="password"
               valor={datos.contrasena}
               onChange={handleChange}
+              requerido
             />
             {error && <p role="alert" className="sin-resultados">{error}</p>}
             <Boton texto={enviando ? 'INGRESANDO...' : 'Ingresar'} tipo="submit" variante="azul" />
           </form>
-          <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
+          <p className="registro-link">
             ¿No tenes cuenta?{' '}
             <Link to="/registro" className="link-naranja">
               Registrate acá

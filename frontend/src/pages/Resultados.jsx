@@ -59,6 +59,33 @@ function Resultados() {
           })
         )
         const promediosPorProfesional = new Map(promedios)
+        const profesionalesPorId = new Map()
+        serviciosApi.forEach((servicio) => {
+          const id = Number(servicio.profesional_id)
+          if (!profesionalesPorId.has(id)) {
+            profesionalesPorId.set(id, {
+              id,
+              servicioId: Number(servicio.servicio_id),
+              nombre: `${servicio.profesional_nombre} ${servicio.profesional_apellido}`.trim(),
+              categorias: [],
+              zona: servicio.zona || 'Zona no especificada',
+              puntuacion: promediosPorProfesional.get(servicio.profesional_id) || 0,
+              verificado: Boolean(servicio.verificado),
+              trabajosRealizados: null,
+              servicios: []
+            })
+          }
+
+          const profesional = profesionalesPorId.get(id)
+          if (!profesional.categorias.includes(servicio.categoria_nombre)) {
+            profesional.categorias.push(servicio.categoria_nombre)
+          }
+          profesional.servicios.push({
+            id: Number(servicio.servicio_id),
+            nombre: servicio.titulo,
+            precio: servicio.precio == null ? null : Number(servicio.precio)
+          })
+        })
 
         if (vigente) {
           setCategorias(categoriasApi)
@@ -68,18 +95,9 @@ function Resultados() {
           ])])
           setFiltroOficio(categoria?.nombre || oficio)
           setFiltroZona(queryParams.get('zona') || '')
-          setServicios(serviciosApi.map((servicio) => ({
-            id: Number(servicio.profesional_id),
-            servicioId: Number(servicio.servicio_id),
-            nombre: `${servicio.profesional_nombre} ${servicio.profesional_apellido}`.trim(),
-            oficio: servicio.categoria_nombre,
-            titulo: servicio.titulo,
-            zona: servicio.zona || 'Zona no especificada',
-            puntuacion: promediosPorProfesional.get(servicio.profesional_id) || 0,
-            verificado: Boolean(servicio.verificado),
-            trabajosRealizados: null,
-            servicios: [{ nombre: servicio.titulo, precio: Number(servicio.precio) || 0 }],
-            valoraciones: []
+          setServicios([...profesionalesPorId.values()].map((profesional) => ({
+            ...profesional,
+            oficio: profesional.categorias.join(', ')
           })))
         }
       } catch (requestError) {
