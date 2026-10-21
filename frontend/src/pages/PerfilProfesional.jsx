@@ -32,6 +32,7 @@ function PerfilProfesional() {
           .map((servicio) => ({
             id: Number(servicio.servicio_id),
             nombre: servicio.titulo,
+            descripcion: servicio.servicio_descripcion || '',
             precio: servicio.precio == null ? null : Number(servicio.precio)
           }))
 
@@ -46,7 +47,9 @@ function PerfilProfesional() {
             titulo: servicios[0]?.nombre || 'Profesional',
             zona: perfil.zona || 'Zona no especificada',
             disponibilidad: perfil.disponibilidad,
-            verificado: Boolean(perfil.verificado),
+            verificado: Boolean(serviciosResponse.data.find(
+              (servicio) => Number(servicio.profesional_id) === Number(id)
+            )?.verificado),
             puntuacion: Number(promedioResponse.data?.promedio) || 0,
             trabajosRealizados: null,
             sobreMi: perfil.biografia,
@@ -88,7 +91,7 @@ function PerfilProfesional() {
           <button className="volver-resultados" onClick={() => navigate(-1)}>
             ← VOLVER A RESULTADOS
           </button>
-          <TarjetaProfesional profesional={profesional} modo="perfil" />
+          <TarjetaProfesional key={profesional.id} profesional={profesional} modo="perfil" />
         </>
       ) : null}
     </>

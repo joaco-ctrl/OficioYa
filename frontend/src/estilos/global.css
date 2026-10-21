@@ -943,6 +943,190 @@ button:disabled {
   border-left: 6px solid var(--naranja);
 }
 
+.perfil-publico {
+  max-width: 900px;
+  margin: 24px auto 80px;
+  padding: 0 24px;
+}
+
+.perfil-publico-banner {
+  padding: 30px 34px;
+  background: var(--crema);
+  border: 1px solid var(--gris-borde);
+  border-left: 6px solid var(--naranja);
+  border-radius: 22px;
+  box-shadow: var(--sombra-fina);
+}
+
+.perfil-publico-presentacion {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.perfil-publico-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 88px;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--naranja) 0%, var(--naranja-oscuro) 100%);
+  color: var(--blanco);
+  font-size: 36px;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(242, 140, 40, 0.35);
+}
+
+.perfil-publico-identidad {
+  min-width: 0;
+}
+
+.perfil-publico-nombre {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.perfil-publico-nombre h1 {
+  color: var(--azul-oscuro);
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.perfil-publico-oficio {
+  margin: 6px 0 10px;
+  color: var(--azul);
+  font-size: 15px;
+}
+
+.perfil-publico-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  color: var(--gris-texto);
+  font-size: 13px;
+}
+
+.perfil-publico-sobre-mi {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gris-borde);
+}
+
+.perfil-publico-sobre-mi h2,
+.perfil-publico-panel > h2,
+.perfil-publico-valoraciones h2 {
+  margin-bottom: 10px;
+  color: var(--azul-oscuro);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.perfil-publico-sobre-mi p {
+  color: var(--gris-texto);
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.perfil-publico-nav {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 20px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+.perfil-publico-nav button {
+  min-height: 48px;
+  padding: 0 18px;
+  border-bottom: 3px solid transparent;
+  color: var(--azul-oscuro);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.perfil-publico-nav button[aria-current='page'] {
+  border-bottom-color: var(--naranja);
+  color: var(--naranja-oscuro);
+}
+
+.perfil-publico-panel {
+  padding: 26px 30px;
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 18px;
+  box-shadow: var(--sombra-fina);
+}
+
+.perfil-publico-servicios {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.perfil-publico-servicios li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+.perfil-publico-servicios li:last-child {
+  border-bottom: 0;
+}
+
+.perfil-publico-servicios h3 {
+  color: var(--azul-oscuro);
+  font-size: 16px;
+}
+
+.perfil-publico-servicios p {
+  margin: 6px 0;
+  color: var(--gris-texto);
+  font-size: 14px;
+  white-space: pre-line;
+}
+
+.perfil-publico-servicios li > div > span {
+  color: var(--naranja-oscuro);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.perfil-publico-valoraciones {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gris-borde);
+}
+
+.perfil-publico-selector {
+  display: grid;
+  gap: 8px;
+  max-width: 520px;
+  color: var(--azul-oscuro);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.perfil-publico-selector select {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 8px;
+  background: var(--blanco);
+  color: var(--azul-oscuro);
+}
+
+.perfil-publico-panel .boton-solicitar {
+  display: block;
+  margin: 22px 0 0;
+}
+
 .perfil-avatar {
   width: 88px;
   height: 88px;
@@ -1267,6 +1451,36 @@ button:disabled {
     flex-direction: column;
     text-align: center;
     padding: 28px 20px;
+  }
+
+  .perfil-publico {
+    padding: 0 16px;
+  }
+
+  .perfil-publico-banner,
+  .perfil-publico-panel {
+    padding: 24px 20px;
+  }
+
+  .perfil-publico-presentacion {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .perfil-publico-nombre,
+  .perfil-publico-meta {
+    justify-content: center;
+  }
+
+  .perfil-publico-servicios li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .perfil-publico-nav button {
+    flex: 1;
+    padding: 0 8px;
   }
 
   .perfil-nombre-fila {
