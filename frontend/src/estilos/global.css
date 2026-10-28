@@ -455,6 +455,23 @@ button:disabled {
   text-align: center;
 }
 
+.inicio-sesion-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.inicio-sesion-acciones .boton {
+  flex: 1;
+  min-width: 0;
+  margin: 14px 0 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 /* ============================
    PANTALLA CON FONDO NARANJA
    ============================ */
@@ -1817,8 +1834,10 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 20px;
+  width: 100%;
+  max-width: 900px;
   padding: 24px 28px;
-  margin-bottom: 0;
+  margin: 16px auto 0;
   background: var(--blanco);
   border: 1px solid var(--gris-borde);
   border-left: 6px solid var(--naranja);
@@ -1850,7 +1869,8 @@ button:disabled {
   text-transform: uppercase;
 }
 
-.perfil-resumen h1 {
+.perfil-resumen h1,
+.perfil-resumen h2 {
   color: var(--azul-oscuro);
   font-size: 25px;
   line-height: 1.25;
@@ -1943,7 +1963,8 @@ button:disabled {
     font-size: 20px;
   }
 
-  .perfil-resumen h1 {
+  .perfil-resumen h1,
+  .perfil-resumen h2 {
     font-size: 20px;
   }
 
@@ -2421,6 +2442,15 @@ button:disabled {
 }
 
 @media (max-width: 380px) {
+  .inicio-sesion-acciones {
+    gap: 8px;
+  }
+
+  .inicio-sesion-acciones .boton {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+
   .encabezado-logo img {
     width: 34px;
     height: 34px;

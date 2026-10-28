@@ -1,7 +1,123 @@
 const conexion = require("../config/database")
 const bcrypt = require("bcrypt")
+const crypto = require("crypto")
+const nodemailer = require("nodemailer")
 
+async function solicitarRecuperacion(email) {
+  const frontendUrl = process.env.FRONTEND_URL
+  const smtpHost = process.env.SMTP_HOST
+  const smtpPort = Number(process.env.SMTP_PORT)
+  const smtpUser = process.env.SMTP_USER
+  const smtpPassword = process.env.SMTP_PASSWORD
+  const smtpFrom = process.env.SMTP_FROM
 
+  if (!frontendUrl || !smtpHost || !Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535 ||
+      !smtpUser || !smtpPassword || !smtpFrom) {
+    const error = new Error('La configuración de correo para recuperación está incompleta')
+    error.code = 'PASSWORD_RESET_EMAIL_NOT_CONFIGURED'
+    throw error
+  }
+
+  const transport = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: String(process.env.SMTP_SECURE).toLowerCase() === 'true',
+    auth: { user: smtpUser, pass: smtpPassword }
+  })
+  await conexion.promise().query(
+    'DELETE FROM password_reset_tokens WHERE expires_at <= NOW()'
+  )
+  const [usuarios] = await conexion.promise().query(
+    'SELECT email FROM usuarios WHERE email = ? AND activo = 1 AND deleted_at IS NULL LIMIT 1',
+    [email]
+  )
+
+  if (usuarios.length === 0) return
+
+  const token = crypto.randomBytes(32).toString('hex')
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+  await conexion.promise().query('DELETE FROM password_reset_tokens WHERE email = ?', [email])
+  await conexion.promise().query(
+    'INSERT INTO password_reset_tokens (email, token_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 20 MINUTE))',
+    [email, tokenHash]
+  )
+
+  const link = `${frontendUrl.replace(/\/$/, '')}/restablecer-contrasena?token=${encodeURIComponent(token)}`
+
+  try {
+    await transport.sendMail({
+      from: smtpFrom,
+      to: usuarios[0].email,
+      subject: 'Recuperá tu contraseña de OficioYa',
+      text: `Para crear una nueva contraseña, abrí este enlace (vence en 20 minutos): ${link}`,
+      html: `<p>Recibimos una solicitud para cambiar la contraseña de tu cuenta.</p><p><a href="${link}">Crear una nueva contraseña</a></p><p>El enlace vence en 20 minutos. Si no solicitaste este cambio, podés ignorar este correo.</p>`
+    })
+  } catch (error) {
+    error.passwordResetDeliveryFailed = true
+    try {
+      await conexion.promise().query('DELETE FROM password_reset_tokens WHERE token_hash = ?', [tokenHash])
+    } catch (cleanupError) {
+      error.cleanupError = cleanupError
+    }
+    throw error
+  }
+}
+
+async function restablecerContrasena(token, password) {
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+  const [tokensVigentes] = await conexion.promise().query(
+    'SELECT email FROM password_reset_tokens WHERE token_hash = ? AND expires_at > NOW() LIMIT 1',
+    [tokenHash]
+  )
+  if (tokensVigentes.length === 0) return false
+
+  const passwordHash = await bcrypt.hash(password, 10)
+  const connection = await conexion.promise().getConnection()
+  let transactionStarted = false
+
+  try {
+    await connection.beginTransaction()
+    transactionStarted = true
+    const [tokens] = await connection.query(
+      'SELECT email FROM password_reset_tokens WHERE token_hash = ? AND expires_at > NOW() FOR UPDATE',
+      [tokenHash]
+    )
+
+    if (tokens.length === 0) {
+      await connection.rollback()
+      transactionStarted = false
+      return false
+    }
+
+    const email = tokens[0].email
+    const [result] = await connection.query(
+      'UPDATE usuarios SET password = ? WHERE email = ? AND activo = 1 AND deleted_at IS NULL',
+      [passwordHash, email]
+    )
+
+    if (result.affectedRows === 0) {
+      await connection.rollback()
+      transactionStarted = false
+      return false
+    }
+
+    await connection.query('DELETE FROM password_reset_tokens WHERE email = ?', [email])
+    await connection.commit()
+    transactionStarted = false
+    return true
+  } catch (error) {
+    if (transactionStarted) {
+      try {
+        await connection.rollback()
+      } catch (rollbackError) {
+        error.rollbackError = rollbackError
+      }
+    }
+    throw error
+  } finally {
+    connection.release()
+  }
+}
 
 function login(data, callback) {
     const { email, password } = data;
@@ -134,5 +250,7 @@ module.exports = {
     usuarioRegistro,
   profesionalRegistro,
   obtenerPerfilUsuario,
-  actualizarPerfilUsuario
+  actualizarPerfilUsuario,
+  solicitarRecuperacion,
+  restablecerContrasena
 }

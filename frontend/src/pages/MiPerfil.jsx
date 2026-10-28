@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Encabezado from '../components/Encabezado.jsx'
-import NavegacionPerfil from '../components/NavegacionPerfil.jsx'
+import NavegacionPerfil, { actualizarPerfilResumen } from '../components/NavegacionPerfil.jsx'
 import api from '../api/api.js'
 import { mensajeError } from '../utilidades/mensajeError.js'
 
@@ -72,7 +72,9 @@ function MiPerfil() {
     try {
       const ruta = esProfesional ? '/profesionales/mi-perfil' : '/auth/mi-perfil'
       const { data } = await api.put(ruta, campos)
-      setPerfil((actual) => ({ ...actual, ...(data.perfil || data) }))
+      const perfilActualizado = { ...perfil, ...(data.perfil || data) }
+      setPerfil(perfilActualizado)
+      actualizarPerfilResumen(perfilActualizado)
       setMensaje('Perfil actualizado correctamente.')
     } catch (requestError) {
       setError(mensajeError(requestError, 'No se pudo actualizar el perfil.'))
@@ -140,9 +142,9 @@ function MiPerfil() {
     <>
       <Encabezado mostrarAuth />
       <main className="solicitudes-contenedor">
+        <NavegacionPerfil />
         {cargando ? <p className="sin-resultados">Cargando perfil...</p> : (
           <>
-            <NavegacionPerfil />
             {error && <p role="alert" className="sin-resultados">{error}</p>}
             {mensaje && <p role="status" className="sin-resultados">{mensaje}</p>}
 
@@ -182,7 +184,6 @@ function MiPerfil() {
             {esProfesional && pestana === 'servicios' && (
               <>
                 <section className="solicitudes-lista" aria-label="Mis servicios">
-                  <h2>Mis servicios</h2>
                   {servicios.length === 0 ? <p className="sin-resultados">Todavía no publicaste servicios.</p> : servicios.map((servicio) => (
                     <article className="solicitud-card" key={servicio.servicio_id}>
                       <div className="solicitud-card-header"><div className="solicitud-card-info"><h3>{servicio.titulo}</h3><p>{servicio.categoria_nombre} · {servicio.precio == null ? 'Precio a consultar' : `$${Number(servicio.precio).toLocaleString('es-AR')}`}</p></div><span className={`estado-badge ${servicio.activo ? 'estado-respondido' : 'estado-rechazado'}`}>{servicio.activo ? 'Activo' : 'Inactivo'}</span></div>

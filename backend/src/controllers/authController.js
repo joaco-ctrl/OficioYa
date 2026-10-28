@@ -92,8 +92,60 @@ function actualizarMiPerfil(req, res) {
     });
 }
 
+async function solicitarRecuperacion(req, res) {
+      const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return res.status(400).json({ mensaje: 'Ingresá un correo electrónico válido.' });
+      }
 
-   const profesionalRegistro = async (req, res) => {
+      try {
+          await authService.solicitarRecuperacion(email);
+          return res.status(202).json({
+              mensaje: 'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer la contraseña.'
+          });
+      } catch (error) {
+          console.error('Error al procesar la recuperación de contraseña:', {
+              code: error.code,
+              message: error.message,
+              cleanupError: error.cleanupError?.message
+          });
+          if (error.code === 'PASSWORD_RESET_EMAIL_NOT_CONFIGURED') {
+              return res.status(503).json({
+                  mensaje: 'La recuperación todavía no está configurada: falta configurar el servicio de correo (SMTP) en el backend.'
+              });
+          }
+          if (error.passwordResetDeliveryFailed) {
+              return res.status(202).json({
+                  mensaje: 'Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer la contraseña.'
+              });
+          }
+          return res.status(503).json({ mensaje: 'No se pudo procesar la solicitud. Intentá nuevamente más tarde.' });
+      }
+}
+
+async function restablecerContrasena(req, res) {
+      const { token, password } = req.body || {};
+      if (typeof token !== 'string' || !/^[a-f0-9]{64}$/i.test(token)) {
+          return res.status(400).json({ mensaje: 'El enlace no es válido o venció. Solicitá uno nuevo.' });
+      }
+      if (typeof password !== 'string' || Buffer.byteLength(password, 'utf8') < 8 || Buffer.byteLength(password, 'utf8') > 72) {
+          return res.status(400).json({ mensaje: 'La contraseña debe tener entre 8 y 72 bytes.' });
+      }
+
+      try {
+          const actualizado = await authService.restablecerContrasena(token, password);
+          if (!actualizado) {
+              return res.status(400).json({ mensaje: 'El enlace no es válido o venció. Solicitá uno nuevo.' });
+          }
+          return res.status(200).json({ mensaje: 'Tu contraseña fue actualizada. Ya podés iniciar sesión.' });
+      } catch (error) {
+          console.error('Error al restablecer la contraseña:', error.code || error.message);
+          return res.status(500).json({ mensaje: 'No se pudo cambiar la contraseña. Intentá nuevamente.' });
+      }
+}
+
+
+     const profesionalRegistro = async (req, res) => {
   try {
     const { nombre, apellido, email, password } = req.body;
         const categoria_id = Number(req.body.categoria_id);
@@ -130,5 +182,7 @@ module.exports = {
     usuarioRegistro,
     profesionalRegistro,
     obtenerMiPerfil,
-    actualizarMiPerfil
+    actualizarMiPerfil,
+    solicitarRecuperacion,
+    restablecerContrasena
 }

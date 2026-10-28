@@ -2,12 +2,27 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import api from '../api/api.js'
 
+const perfilesCache = new Map()
+
 function obtenerUsuario() {
   try {
     return JSON.parse(localStorage.getItem('oficioya_usuario') || 'null')
   } catch {
     return null
   }
+}
+
+function obtenerClavePerfil(usuario) {
+  return `${usuario?.rol}_${usuario?.id || usuario?.email || 'usuario'}`
+}
+
+export function actualizarPerfilResumen(perfil) {
+  const clave = obtenerClavePerfil(obtenerUsuario())
+  const perfilActualizado = { ...perfilesCache.get(clave), ...perfil }
+  perfilesCache.set(clave, perfilActualizado)
+  window.dispatchEvent(new CustomEvent('oficioya-perfil-actualizado', {
+    detail: { clave, perfil: perfilActualizado }
+  }))
 }
 
 function leerNotificaciones(clave) {
@@ -36,18 +51,36 @@ function contarNotificaciones(clave) {
 function NavegacionPerfil() {
   const usuario = obtenerUsuario()
   const rol = usuario?.rol
+  const clavePerfil = obtenerClavePerfil(usuario)
   const location = useLocation()
   const esPaginaPerfil = location.pathname === '/mi-perfil'
-  const [perfil, setPerfil] = useState({ email: usuario?.email || '' })
- const claveNotificaciones = `oficioya_notificaciones_${rol}_${usuario?.id || usuario?.email || 'usuario'}`
- const [notificaciones, setNotificaciones] = useState(() => contarNotificaciones(claveNotificaciones))
+  const [perfil, setPerfil] = useState(() => (
+    perfilesCache.get(clavePerfil) || { email: usuario?.email || '' }
+  ))
+  const claveNotificaciones = `oficioya_notificaciones_${rol}_${usuario?.id || usuario?.email || 'usuario'}`
+  const [notificaciones, setNotificaciones] = useState(() => contarNotificaciones(claveNotificaciones))
   
   useEffect(() => {
+    if (perfilesCache.has(clavePerfil)) return
+
     const ruta = rol === 'profesional' ? '/profesionales/mi-perfil' : '/auth/mi-perfil'
     api.get(ruta)
-      .then(({ data }) => setPerfil(data.perfil || data))
+      .then(({ data }) => {
+        const perfilCargado = data.perfil || data
+        perfilesCache.set(clavePerfil, perfilCargado)
+        setPerfil(perfilCargado)
+      })
       .catch(() => {})
-  }, [rol])
+  }, [clavePerfil, rol])
+
+  useEffect(() => {
+    const actualizar = (event) => {
+      if (event.detail?.clave === clavePerfil) setPerfil(event.detail.perfil)
+    }
+
+    window.addEventListener('oficioya-perfil-actualizado', actualizar)
+    return () => window.removeEventListener('oficioya-perfil-actualizado', actualizar)
+  }, [clavePerfil])
 
   useEffect(() => {
     const actualizar = (event) => {

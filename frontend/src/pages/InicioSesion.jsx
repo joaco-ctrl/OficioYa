@@ -66,12 +66,17 @@ function InicioSesion() {
               requerido
             />
             {error && <p role="alert" className="sin-resultados">{error}</p>}
-            <Boton texto={enviando ? 'INGRESANDO...' : 'Ingresar'} tipo="submit" variante="azul" />
+            <div className="inicio-sesion-acciones">
+              <Boton texto={enviando ? 'INGRESANDO...' : 'Ingresar'} tipo="submit" variante="azul" />
+              <Link to="/registro" className="boton boton-naranja">
+                Crear una cuenta
+              </Link>
+            </div>
           </form>
           <p className="registro-link">
-            ¿No tenes cuenta?{' '}
-            <Link to="/registro" className="link-naranja">
-              Registrate acá
+            ¿olvidaste tu contraseña?{' '}
+            <Link to="/recuperar-contrasena" className="link-naranja">
+              Recupérala acá
             </Link>
           </p>
         </Tarjeta>
