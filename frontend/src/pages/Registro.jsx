@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import Encabezado from '../components/Encabezado.jsx'
 import Tarjeta from '../components/Tarjeta.jsx'
 import Boton from '../components/Boton.jsx'
@@ -25,7 +25,14 @@ function Registro() {
             variante="naranja"
             onClick={() => navigate('/registro/profesional')}
           />
+            <p className="registro-link">
+            ¿tenes cuenta?{' '}
+            <Link to="/inicio-sesion" className="link-naranja">
+              inicia sesion acá
+            </Link>
+          </p>
         </Tarjeta>
+        
       </div>
     </>
   )

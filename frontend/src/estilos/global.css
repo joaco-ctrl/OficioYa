@@ -1998,3 +1998,427 @@ button:disabled {
     min-height: 44px;
   }
 }
+
+@media (max-width: 900px) {
+  .seccion {
+    margin: 20px auto 56px;
+    padding: 0 20px;
+  }
+
+  .layout-resultados {
+    min-height: 0;
+  }
+
+  .sidebar-filtros,
+  .contenido-resultados {
+    min-width: 0;
+  }
+
+  .contenido-resultados h2,
+  .subtitulo {
+    overflow-wrap: anywhere;
+  }
+
+  .tarjeta-resultado-info {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .tarjeta-resultado-acciones button {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .perfil-publico-identidad,
+  .perfil-datos {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .perfil-publico-nombre h1,
+  .perfil-datos h2,
+  .solicitud-resumen h3,
+  .solicitud-card-info h2,
+  .solicitud-card-info h3 {
+    overflow-wrap: anywhere;
+  }
+
+  .solicitud-card-body,
+  .solicitud-campo {
+    min-width: 0;
+  }
+
+  .solicitud-valor,
+  .perfil-publico-servicios p,
+  .perfil-publico-sobre-mi p {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 600px) {
+  .encabezado {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .encabezado-logo {
+    flex: 0 1 auto;
+    gap: 8px;
+  }
+
+  .encabezado-logo img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .logo-texto {
+    font-size: 18px;
+  }
+
+  .encabezado-derecha {
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+
+  .encabezado-link,
+  .encabezado-accion {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  .encabezado-boton {
+    padding: 9px 13px;
+    font-size: 12px;
+  }
+
+  .hero {
+    padding: 56px 16px 36px;
+    margin-bottom: 40px;
+  }
+
+  .hero h1 {
+    font-size: clamp(24px, 7vw, 32px);
+    letter-spacing: -0.5px;
+    overflow-wrap: anywhere;
+  }
+
+  .hero p {
+    margin-bottom: 24px;
+  }
+
+  .barra-busqueda {
+    width: 100%;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .select-busqueda {
+    min-width: 0;
+  }
+
+  .select-busqueda select {
+    min-width: 0;
+  }
+
+  .boton-buscar {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .seccion {
+    margin: 16px auto 44px;
+    padding: 0 16px;
+  }
+
+  .seccion h2 {
+    margin-bottom: 24px;
+    font-size: 23px;
+  }
+
+  .grilla-categorias {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    gap: 12px;
+  }
+
+  .categoria {
+    min-width: 0;
+    padding: 24px 12px;
+  }
+
+  .pantalla-con-fondo {
+    min-height: calc(100dvh - 64px);
+    padding: 28px 12px 40px;
+    border-radius: 0 0 24px 24px;
+  }
+
+  .tarjeta {
+    padding: 28px 18px;
+    margin: 24px auto;
+    border-radius: 18px;
+  }
+
+  .tarjeta h1 {
+    margin-bottom: 24px;
+    font-size: clamp(23px, 6vw, 29px);
+    overflow-wrap: anywhere;
+  }
+
+  .campo input,
+  .campo select,
+  .campo textarea,
+  .solicitud-campo input,
+  .solicitud-campo select,
+  .solicitud-campo textarea,
+  .solicitud-contenedor textarea {
+    padding: 12px 14px;
+  }
+
+  .boton {
+    max-width: 100%;
+    padding: 13px 22px;
+    white-space: normal;
+  }
+
+  .form-profesional {
+    gap: 12px;
+  }
+
+  .contenido-resultados {
+    padding: 24px 16px;
+  }
+
+  .contenido-resultados h2 {
+    font-size: 20px;
+    padding-left: 12px;
+  }
+
+  .subtitulo {
+    padding-left: 17px;
+    margin-bottom: 22px;
+  }
+
+  .tarjeta-resultado {
+    gap: 14px;
+    padding: 18px 16px;
+  }
+
+  .tarjeta-resultado-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+
+  .tarjeta-resultado-acciones {
+    flex-direction: column;
+  }
+
+  .tarjeta-resultado-acciones button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .tarjeta-resultado-meta {
+    gap: 8px;
+  }
+
+  .volver-resultados {
+    display: block;
+    padding: 20px 16px 0;
+    text-align: left;
+    font-size: 12px;
+  }
+
+  .perfil-publico {
+    margin: 20px auto 48px;
+    padding: 0 12px;
+  }
+
+  .perfil-publico-banner,
+  .perfil-publico-panel {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .perfil-publico-avatar {
+    flex-basis: 68px;
+    width: 68px;
+    height: 68px;
+    font-size: 28px;
+  }
+
+  .perfil-publico-nombre h1 {
+    font-size: 22px;
+  }
+
+  .perfil-publico-nav {
+    gap: 4px;
+  }
+
+  .perfil-publico-nav button {
+    min-width: 0;
+    min-height: 44px;
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+
+  .perfil-publico-servicios li > div {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .perfil-publico-servicios li > .boton {
+    width: 100%;
+    margin: 0;
+  }
+
+  .perfil-publico-panel .boton-solicitar {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 14px;
+  }
+
+  .perfil-publico-selector {
+    max-width: 100%;
+  }
+
+  .perfil-contenedor {
+    margin: 20px auto 48px;
+    padding: 0 12px;
+  }
+
+  .perfil-cabecera,
+  .perfil-bloque {
+    padding: 20px 16px;
+  }
+
+  .solicitud-contenedor {
+    margin: 20px auto 44px;
+    padding: 0 12px;
+    gap: 14px;
+  }
+
+  .solicitud-resumen {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .solicitud-avatar {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    font-size: 20px;
+  }
+
+  .solicitud-contenedor .tarjeta {
+    padding: 24px 16px;
+  }
+
+  .solicitudes-contenedor {
+    margin: 22px auto 48px;
+    padding: 0 12px;
+  }
+
+  .solicitudes-header {
+    margin-bottom: 20px;
+  }
+
+  .solicitudes-header h1,
+  .solicitudes-header h2 {
+    font-size: 22px;
+    padding-left: 12px;
+  }
+
+  .solicitudes-subtitulo {
+    padding-left: 17px;
+  }
+
+  .solicitudes-filtros {
+    gap: 6px;
+  }
+
+  .filtro-estado {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .solicitud-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  .solicitud-card-header {
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  .solicitud-card-info h2,
+  .solicitud-card-info h3 {
+    font-size: 16px;
+  }
+
+  .solicitud-card-footer {
+    align-items: stretch;
+  }
+
+  .solicitud-card-footer .boton,
+  .solicitud-card-footer .encabezado-link {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    text-align: center;
+  }
+
+  .perfil-resumen {
+    width: calc(100% - 24px);
+    margin: 16px auto 0;
+    padding: 16px;
+  }
+
+  .perfil-nav {
+    width: calc(100% - 24px);
+    margin: 10px auto 20px;
+  }
+
+  .perfil-nav a {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+  }
+
+  .footer {
+    padding: 32px 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .encabezado-logo img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .logo-texto {
+    font-size: 16px;
+  }
+
+  .encabezado-link,
+  .encabezado-accion {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .encabezado-boton {
+    padding: 8px 10px;
+  }
+
+  .perfil-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .filtro-estado {
+    flex: 1 1 auto;
+  }
+}
