@@ -117,6 +117,7 @@ function NavegacionPerfil() {
             <NavLink to="/mis-trabajos" className="perfil-nav-enlace" onClick={() => marcarLeidas('trabajos')}>
               Ver contratos{indicador('trabajos')}
             </NavLink>
+            <NavLink to="/mis-reportes">Ver reportes</NavLink>
             <Link to="/mi-perfil?tab=perfil" aria-current={location.pathname === '/mi-perfil' && (!location.search || location.search === '?tab=perfil') ? 'page' : undefined}>Actualizar perfil</Link>
             <Link to="/mi-perfil?tab=servicios" aria-current={location.pathname === '/mi-perfil' && location.search === '?tab=servicios' ? 'page' : undefined}>Mis servicios</Link>
             <Link to="/mi-perfil?tab=crear-servicio" aria-current={location.pathname === '/mi-perfil' && location.search === '?tab=crear-servicio' ? 'page' : undefined}>Crear servicios</Link>

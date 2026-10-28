@@ -31,7 +31,8 @@ const crearReporte = (datosReporte, callback) => {
     });
 };
 
-const obtenerMisReportes = (usuarioId, callback) => {
+const obtenerMisReportes = (usuarioId, rol, callback) => {
+    const columnaUsuario = rol === 'profesional' ? 'pr.user_id' : 'p.user_id';
     const sql = `
         SELECT
             r.id,
@@ -39,12 +40,19 @@ const obtenerMisReportes = (usuarioId, callback) => {
             r.descripcion,
             r.estado,
             r.created_at,
-            s.titulo AS servicio_titulo
+            s.titulo AS servicio_titulo,
+            cliente.nombre AS usuario_nombre,
+            cliente.apellido AS usuario_apellido,
+            profesional.nombre AS profesional_nombre,
+            profesional.apellido AS profesional_apellido
         FROM reportes r
         INNER JOIN contratacion c ON c.id = r.contratacion_id
         INNER JOIN presupuestos p ON p.id = c.presupuesto_id
         INNER JOIN servicios s ON s.id = p.servicio_id
-        WHERE p.user_id = ?
+        INNER JOIN profesionales pr ON pr.id = s.profesional_id
+        INNER JOIN usuarios cliente ON cliente.id = p.user_id
+        INNER JOIN usuarios profesional ON profesional.id = pr.user_id
+        WHERE ${columnaUsuario} = ?
         ORDER BY r.id DESC
     `;
 

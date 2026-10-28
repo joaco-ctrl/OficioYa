@@ -9,6 +9,7 @@ import RegistroCliente from '../pages/RegistroCliente.jsx'
 import RegistroProfesional from '../pages/RegistroProfesional.jsx'
 import InicioSesion from '../pages/InicioSesion.jsx'
 import MisContratos from '../pages/MisContratos.jsx'
+import MisReportes from '../pages/MisReportes.jsx'
 import MisTrabajos from '../pages/MisTrabajos.jsx'
 import SolicitudesProfesional from '../pages/SolicitudesProfesional.jsx'
 import AdminCategorias from '../pages/AdminCategorias.jsx'
@@ -26,6 +27,7 @@ function RutasApp() {
       <Route path="/presupuesto/:id" element={<SolicitarPresupuesto />} />
       <Route path="/mis-solicitudes" element={<RutaPrivada roles={['cliente']}><MisSolicitudes /></RutaPrivada>} />
       <Route path="/mis-contratos" element={<RutaPrivada roles={['cliente']}><MisContratos /></RutaPrivada>} />
+      <Route path="/mis-reportes" element={<RutaPrivada roles={['cliente', 'profesional']}><MisReportes /></RutaPrivada>} />
       <Route path="/mis-trabajos" element={<RutaPrivada roles={['profesional']}><MisTrabajos /></RutaPrivada>} />
       <Route path="/solicitudes-profesional" element={<RutaPrivada roles={['profesional']}><SolicitudesProfesional /></RutaPrivada>} />
       <Route path="/admin/categorias" element={<RutaPrivada roles={['administrador']}><AdminCategorias /></RutaPrivada>} />

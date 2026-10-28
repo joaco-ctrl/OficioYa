@@ -24,7 +24,7 @@ const crearReporte = (req, res) => {
 };
 
 const obtenerMisReportes = (req, res) => {
-    reportesService.obtenerMisReportes(req.usuario.id, (err, reportes) => {
+    reportesService.obtenerMisReportes(req.usuario.id, req.usuario.rol, (err, reportes) => {
         if (err) {
             console.error('Error al consultar reportes:', err);
             return res.status(500).json({ mensaje: 'Error al consultar sus reportes' });
