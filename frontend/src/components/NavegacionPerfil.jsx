@@ -39,9 +39,9 @@ function NavegacionPerfil() {
   const location = useLocation()
   const esPaginaPerfil = location.pathname === '/mi-perfil'
   const [perfil, setPerfil] = useState({ email: usuario?.email || '' })
-  const [notificaciones, setNotificaciones] = useState(() => contarNotificaciones(claveNotificaciones))
-  const claveNotificaciones = `oficioya_notificaciones_${rol}_${usuario?.id || usuario?.email || 'usuario'}`
-
+ const claveNotificaciones = `oficioya_notificaciones_${rol}_${usuario?.id || usuario?.email || 'usuario'}`
+ const [notificaciones, setNotificaciones] = useState(() => contarNotificaciones(claveNotificaciones))
+  
   useEffect(() => {
     const ruta = rol === 'profesional' ? '/profesionales/mi-perfil' : '/auth/mi-perfil'
     api.get(ruta)
